@@ -1,6 +1,6 @@
 
 \NeedsTeXFormat{LaTeX2e} 
-\ProvidesPackage{UFSC-ECA-Monograph}[2018/08/20]
+\ProvidesPackage{style/UFSC-ECA-Monograph}[2018/08/20]
 
 % Formatação da página e aspectos gerais
 \RequirePackage[a4paper,top=3cm,left=3cm,right=2cm,bottom=2cm]{geometry}
@@ -15,7 +15,7 @@
 }
 \ProcessOptions\relax
 
-% use isso!
+% use isso quando quiser definir qualquer coisa dependente de linguagem!!!
 %\ifx\isenglish\undefined
 %portuguese
 %\else
@@ -55,6 +55,16 @@
 \newrefformat{apd}{Apendix~\ref{#1}}
 \newrefformat{eta}{Etapa~\ref{#1}}
 \newrefformat{quadro}{Frame~\ref{#1}}
+\fi
+
+\usepackage{caption}
+
+\ifx\isenglish\undefined
+\captionsetup[figure]{name={Figura}}
+\captionsetup[table]{name={Tabela}}
+\else
+\captionsetup[figure]{name={Figure}}
+\captionsetup[table]{name={Table}}
 \fi
 
 % acronimos
@@ -123,20 +133,13 @@
 % ************* CAPA UFSC **************
 \renewcommand{\imprimircapa}{%
   \begin{capa}%
-  	
-	\begin{figure}[htb]
-		\centering
-			\begin{minipage}[b]{0.2 \linewidth}
-				\begin{center}
-					\includegraphics[width=60pt, height=60pt]{ufsc}
-				\end{center}
-			\end{minipage}
-			\begin{minipage}[b]{0.7 \linewidth}
-				{\large {\textbf{Federal University of Santa Catarina}}\\[5pt]
-					Campus Blumenau\\[5pt]
-					Departamento de Engenharias}
-			\end{minipage}
-	\end{figure}
+
+    \begin{center}
+    {\large {\textbf{Universidade Federal de Santa Catarina}}\\
+	Campus Blumenau\\
+	Departamento de Engenharias}
+    \end{center}
+
 	\centering \textcolor{black}{\rule {16cm}{3.25pt}}
 				
 %	\vspace{0.5cm}
@@ -145,7 +148,8 @@
     {\ABNTEXchapterfont\large\imprimirautor}
      \vspace*{5cm}
     
-    {\ABNTEXchapterfont\bfseries\LARGE\imprimirtitulo}
+    \ABNTEXchapterfont\bfseries\LARGE\imprimirtitulo
+    
     \vfill
 
 		\vspace*{\stretch{3}}
@@ -163,8 +167,8 @@
 \makeatletter
 \renewcommand{\folhaderostocontent}{
 \begin{center}
-{\Large {\textbf{Federal University of Santa Catarina}}\\[5pt]
-Campus Blumenau\\[5pt]
+{\large {\textbf{Universidade Federal de Santa Catarina}}\\
+Campus Blumenau\\
 Departamentos de Engenharias}\\
 \textcolor{black}{\rule {16cm}{2.25pt}}
 
@@ -223,7 +227,7 @@ Departamentos de Engenharias}\\
 \imprimirtitulo \, - \imprimirlocal, \imprimirdata \, - \pageref{LastPage} p., 30 cm.\\
 \imprimirorientadorRotulo \, \imprimirorientador \\
 \deelchave \\
-\noindent I. Federal University of Santa Catarina. \deelcurso. II. \imprimirtitulo.\\
+\noindent I. Universidade Federal de Santa Catarina. \deelcurso. II. \imprimirtitulo.\\
 \hline
 \end{tabular}
 \end{center}
@@ -314,9 +318,9 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
 %-----------Formatação do Resumo ----------
 \newcommand{\textoresumo}{
 \newpage
-\noindent {\imprimirautor}. {\textbf{\imprimirtitulo}}. \imprimirdata. 
-\pageref{LastPage}~p.  Trabalho de Conclusão de Curso em \deelcurso \hspace{0.15cm} - Universidade Federal de Santa Catarina, \imprimirlocal.
-\vspace{1.25cm}
+%\noindent {\imprimirautor}. {\textbf{\imprimirtitulo}}. \imprimirdata. 
+%\pageref{LastPage}~p.  Trabalho de Conclusão de Curso em \deelcurso \hspace{0.15cm} - Universidade Federal de Santa Catarina, \imprimirlocal.
+%\vspace{1.25cm}
 \begin{resumo}
 \deelDEELresumo \\
 \vspace{0.75cm}
@@ -328,16 +332,20 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
 
 %-----------Formatação do Abstract ----------
 \newcommand{\textoabstract}{
-\noindent {\imprimirautor}. {\textbf{\deeltitulouk}}. \imprimirdata. 
-\pageref{LastPage}~p. Monograph in Control and Automation Engineering - Federal University of Santa Catarina, \imprimirlocal.
-\vspace{1.25cm}
+%\noindent {\imprimirautor}. {\textbf{\deeltitulouk}}. \imprimirdata. 
+%\pageref{LastPage}~p. Monograph in Control and Automation Engineering - Federal University of Santa Catarina, \imprimirlocal.
+%\vspace{1.25cm}
 \begin{resumo}[Abstract]
 \foreignlanguage{english}{\deelDEELabstract}\\
 \vspace{0.75cm}
 
-{\textbf{Key-words:}} \deelkey
+{\textbf{Keywords:}} \deelkey
 \end{resumo}
 }
+
+%-----------Formatação das Referências ----------
+
+
 
 
 %-----------Formatação dos Elementos Pré-Textuais (na ordem) ----------
@@ -356,6 +364,52 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
 \textoepigrafe          % Opcional
 \textoresumo            % Obrigatório
 \textoabstract          % Obrigatório
+}
+
+%% outros elementos (sumário, lista de figuras, quadros e tabelas e bibliografia)
+
+% sumário
+\newcommand{\Sumario}{
+\cleardoublepage
+\ifx\isenglish\undefined
+\renewcommand{\contentsname}{Sumário}
+\else
+\renewcommand{\contentsname}{Table of contents}
+\fi
+\tableofcontents*
+\thispagestyle{empty}
+}
+
+\newcommand{\ListaDeFiguras}{
+\ifx\isenglish\undefined
+\renewcommand{\listfigurename}{Lista de figuras}
+\renewcommand{\figurename}{Figura}
+\else
+\renewcommand{\listfigurename}{List of figures}
+\fi
+\listoffigures*
+\cleardoublepage
+}
+
+\newcommand{\ListaDeTabelas}{
+\ifx\isenglish\undefined
+\renewcommand{\listtablename}{Lista de tabelas}
+\else
+\renewcommand{\listtablename}{List of tables}
+\fi
+\listoftables*
+\cleardoublepage
+}
+
+% bibliografia
+\newcommand{\Bibliografia}[1]{
+\ifx\isenglish\undefined
+\renewcommand{\bibname}{\textbf{Referências}}
+\else
+\renewcommand{\bibname}{\textbf{References}}
+\fi
+\postextual
+\bibliography{#1}
 }
 
 \endinput

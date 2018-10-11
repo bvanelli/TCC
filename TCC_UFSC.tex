@@ -3,8 +3,8 @@
 		 % twoside: para impressão em verso e anverso.
 
 \input{style/packages.tex} % resto dos pacotes Latex
-\usepackage[english]{UFSC-ECA-Monograph} % personalização da ABNTEX2
-%\usepackage[portuguese]{UFSC-ECA-Monograph} % personalização da ABNTEX2 para escrita em portugues
+\usepackage[english]{style/UFSC-ECA-Monograph} % personalização da ABNTEX2
+%\usepackage[portuguese]{UFSC-ECA-Monograph} % personalização da ABNTEX2 para escrita em portuguesx
 
 
 %---------------------------------------------------------------
@@ -17,11 +17,11 @@
 \tituloingles{Navigation of mobile robots: a case study of a Care-o-bot assistive robot in ROS framework}   % Título do Trabalho em Inglês
 
 \palavraschave{1. Care-o-bot. 2. ROS. 3. Predictive Control.}  % 5 palavras-chave
-\keywords{1. Care-o-bot. 2. ROS. 3. Predictive Control.}   % 5 key-words
+\keywords{1. Care-o-bot. 2. ROS. 3. Predictive Control.}   % 5 palavras-chave para resumo em inglês
 
 \DEELautor{Brunno}{Vanelli}                  % Aluno autor do trabalho
 
-\curso{Control and Automation Engineering}												% Ex: Engenharia Civil
+\curso{Engenharia de Controle e Automação}												% Ex: Engenharia Civil
 
 \orientador{Prof. Dr. Marcelo Roberto Petry}              % Professor Orientador membro da banca 
 
@@ -75,15 +75,9 @@
 %\newpage
 %---- Outros Elementos Pré-Textuais ----
 %--------Lista de figuras--------------------------------------------------------------------
-\listoffigures*
-\cleardoublepage
+\ListaDeFiguras
 %--------Lista de tabelas--------------------------------------------------------------------
-\listoftables*
-\cleardoublepage
-
-\renewcommand{\cfttablename}{Quadro\space} 
-\listof{quadro}{Lista de quadros}
-\cleardoublepage
+\ListaDeTabelas
 
 %--------Lista de Siglas e Abreviaturas------------------------------------------------------
 \include{list_siglas}   % (OBS: Elemento Condicionado à Necessidade) 
@@ -92,9 +86,7 @@
 %\include{list_simbolos} % (OBS: Elemento Condicionado à Necessidade)
 %                       % Veja modelo no arquivo list_simbolos.tex
 %--------Sumário-----------------------------------------------------------------------------
-\cleardoublepage
-\tableofcontents*
-\thispagestyle{empty}
+\Sumario
 %--------------------------------------------------------------------------------------------
 
 
@@ -116,9 +108,8 @@
 
 %----- Elementos Pós-Textuais--------------------------
 %
-%--------Referências-------------------------------------------------------------------------
-\postextual
-\bibliography{bibliografia} % arquivo bibtex com as referências (modelo.bib)
+%--------Referências------------------------------------------------------------------------
+\Bibliografia{bibliografia} % arquivo bibtex com as referências (bibliografia.bib)
 
 %%--------Apendice-------------------------------------------------
 %\apendice                  % Comando que inclui os apendices (sua autoria)

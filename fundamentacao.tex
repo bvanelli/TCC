@@ -111,9 +111,26 @@ string message
 
 This service is used for setting a boolean variable to \textit{true} or \textit{false}, that can be activating or deactivating an actuator. The response consists of a boolean that tells if the operation was successful and a message for better description in case of error.
 
-\section{Gazebo}
+\section{Simulation}
 
-Since ROS only provides the tools to develop a robot system solution, there is a need for testing the code on a real environment. In order to simulate the robot and avoid having to test every configuration on physical hardware, Gazebo provides ROS with a framework to simulate and benchmark the robot or even a group of robots accurately. The \prettyref{fig:gazebo-sim} shows the Gazebo simulation for a supported robot \cite{koenig2004design}.
+Since deploying a test robot at every code change is not possible, and ROS only provides the tools to develop a robot system solution, there is a need for offline simulation of the robots, avoiding having to test every configuration on physical hardware. In this cases, it can be helpful to set up a rigid body simulation. The normal workflow for setting up a simulation is:
+
+% http://ode.org/slides/slide2.html
+\begin{itemize}
+    \item Isolating the important variables in the physical process.
+    \item Model the physical system behaviour using equations.
+    \item Find a method to solve the equations, given the inputs and the initial state of the system.
+    \item Write a computer program that can do that simulation.
+    \item Simulate and benchmark the results against the physical system.
+\end{itemize}
+
+Repeating all this five steps for every physical system will lead to the best results, but can be time consuming and difficult because all the variables involved. But since the possibilities for a robot system are often limited, physics engines or physics SDKs (source development kits) were developed to aid simulation.
+
+While the real world has a lot of complexity, rigid body dynamics can be simplified in rigid bodies, joints, collisions, friction and springs, elements that are important to the process. The physical model can be reduced to the laws of motion, using mass, velocity, acceleration and force as simulation variables. Since the model and the solution to these problems are well known, generalized solvers can be written that compute the simulation at each instant of time, or timesteps.
+
+Many simulators implement this generalized solvers, as well as render the 3D models to show to the user, including game engines like Unity and USARSim (based on Unreal engine), commercial solutions like Microsoft Robot Studio, Webots and MATLAB, and open-source projects like Gazebo \cite{craighead2007survey}. Since Gazebo adopts the mentality of the ROS project of being open and free, it became widely used in the community, and as a result better developed over time.
+
+Gazebo provides ROS with a framework to simulate and benchmark the robot or even a group of robots accurately. The \prettyref{fig:gazebo-sim} shows the Gazebo simulation for a supported robot \cite{koenig2004design}.
 
 \begin{figure}[!ht]
 \centering
@@ -159,7 +176,7 @@ The SDF is an improvement of the URDF descriptor format that supports more funct
 
 \subsection{Physics Engines}
 
-In order to simulate the physical conditions of the robot system, Gazebo supports four different physics engines: ODE, Bullet, Simbody and DART. At the start of each simulation, the user can select the desired physics engine changing the startup flags for the program or configure it on the SDF file.
+In order to simulate the physical conditions of the robot and the environment, Gazebo supports four different physics engines: ODE, Bullet, Simbody and DART. At the start of each simulation, the user can select the desired physics engine changing the startup flags for the program or configure it on the SDF file.
 
 ODE or Open Dynamics Engine is an engine for simulating articulated rigid body structures. It features a stable integrator, meaning that numeric errors shouldn't grow out of control. Because of that, the simulator drops physical accuracy in favor of speed, stability and robustness \cite{smith2005open}.
 
@@ -169,11 +186,46 @@ Simbody is a multibody simulator focused on biomedical research. It was develope
 
 DART or Dynamic Animation and Robotics Toolkit is another rigid body simulation that distinguishes itself by accuracy and stability. The main purpose of this simulator is providing full access to internal kinematic and dynamic quantities \cite{lee2018dart}.
 
-\subsection{Simulation}
-
-
+All four engines are used to tackle different problems. By varying the time step, for instance, the you might obtain better results in your simulation with one of the engines. Usually, when choosing the simulation engine, the relation between number of iterations, error and speed must be taken into account. Some of the simulations require better precision, while others may require real time performance. For a more in depth comparison of the four engines, see \cite{peters2014comparison}.
 
 \subsection{Sensors and actuators}
+
+Gazebo also allows sensors and actuators that will interact with the world and send data back to ROS packages. Sensors can include cameras, laser scanners, and actuators can include drive modules. The sensors are added in the SDF or URDF files. The example below shows the main guidelines to add a camera.
+
+\begin{lstlisting}
+  <gazebo reference="camera_link">
+    <sensor type="camera" name="camera1">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        ...
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>robot/cam1</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_link</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+\end{lstlisting}
+
+Notice that it must include values for image size and update rate on the sensor type. The controller is loaded from a plugin called \texttt{libgazebo\_ros\_camera.so}, that uses as parameters which topic the camera will correspond to and the intrinsic parameters of the lenses, as well as the link the camera will be attached to.
+
+There are many pre-built plugins available at Gazebo library, including Cameras (mono and stereo), Kinect, Laser Scanner, Force and IMU sensors, Differential Drive, Skid Steering Drive, as well as templates to write your own dedicated plugin.
 
 %\section{OpenCV}
 
@@ -193,15 +245,17 @@ The Care-o-bot is a project for a mobile assistive robot that is modular, develo
 
 \subsection{Base}
 
-The base features three steerable wheels used for moving the robot on the ground. The wheels can rotate on the vertical axis, allowing movement in every direction. It is also equipped with 2D laser scanners for object detection and safety, the battery for the robot and the control panel.
+The base features three steerable wheels used for moving the robot on the ground. The robot has three wheels so that it can move freely on the ground. Because the modularity, the wheels can be configured to behave using Ackermann kinematics, moving forwards and backwards and rotating on the vertival axis, but also Omnidirectional kinematics, allowing the robot to move in every direction at a maximum speed of 1,1 m/s. It is also equipped with 2D laser scanners with 360$^{\circ}$ coverage for object detection and safety, and the battery for the robot and the control panel.
 
 \subsection{Torso}
 
-The torso is linked with the base using a spherical joint, providing 3DOF, cameras, a LED Ring, two optional arms with 7DOF each, with a manipulator finger with 2DOF. The manipulator also has cameras and laser scanner for object recognition and picking.
+The torso is linked with the base, and can be configured to be fixed (the torso doesn't move), to use a Pan joint (allowing for a full rotation) or using a spherical joint (providing 3DOF). It can have two optional arms with 7DOF, each with a manipulator finger with 2DOF. The arm is composed by three SCHUNK Powerball ERB modules and one PRL+ 100 module  in  the  shoulder. The manipulator was developed by Schunk especifically for this robot.
+
+The manipulator also has a 3D camera and laser scanner for object recognition and picking, as well as LEDs for illumination. The torso also provides 3D cameras and sensors for computer vision activities that cover up the front of the robot, a LED Ring for signaling and an emergency stop.
 
 \subsection{Head}
 
-The head is linked with torso also with a spherical joint, and contain the human interface to interact with user, including the sound system, microphone, a touch screen display and optional camera for face recognition.
+The head is linked with torso, allowing both a pan joint and a spherical joint, and contain the human interface to interact with user, including the sound system, microphone, a touch screen display and optional camera for face recognition.
 
 
 \subsection{Package organization}
@@ -235,7 +289,114 @@ COB also features high-level capabilities, some of them being:
 \item \texttt{cob\_manipulation}: manipulator related package, including inverse kinematics, arm motion planning and collision avoidance.
 \end{itemize}
 
+\subsection{Basic API}
 
+Most of the capabilities of COB are exposed in the form of topics and services, forming an higher level API and sparing the user from interacting with low level sensors and actuators.
 
-\subsection{Basic components}
+The actuators to move the three wheels base. Since the base kinematics is already calculated by the node, you only need to supply a \texttt{geometry\_msgs/Twist} type message with linear and angular velocities and the drivers will take care of the rest. The topic names can be seen on \prettyref{tab:baseapi}.
 
+\begin{table}[!ht]
+\caption{Base command API.} \label{tab:baseapi}
+\renewcommand*{\arraystretch}{1.1}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{c|c|c}
+Topic Name & Message Type & Information \\
+\hline
+\makecell{\texttt{/base/twist\_mux} \\ \texttt{/command\_navigation}} & \texttt{geometry\_msgs/Twist} & Velocity topics related to navigation \\ \hline
+\makecell{\texttt{/base/twist\_mux} \\ \texttt{/command\_safe}} & \texttt{geometry\_msgs/Twist} & \makecell{Velocity topics related to teleoperation \\ with collision checking and smoothing} \\ \hline
+\makecell{\texttt{/base/twist\_controller} \\ \texttt{/command}} & \texttt{geometry\_msgs/Twist} & \makecell{Low level Velocity topics \\ for control purposes} \\ \hline
+\end{tabular}
+}
+\end{table}
+
+Since the torso and the head only have one joint, they receive a set of points forming a trajectory to follow, given by the \texttt{control\_msgs/FollowJointTrajectory} service message type. This service returns if the robot was able to perform the trajectory, as well as the error in the path. The structure can be seen on \prettyref{tab:headapi}.
+
+\begin{table}[!ht]
+\caption{Torso and head command API.} \label{tab:headapi}
+\renewcommand*{\arraystretch}{1.1}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{c|c|c}
+Topic Name & Message Type & Information \\
+\hline
+\makecell{\texttt{/torso/joint\_trajectory\_controller} \\ \texttt{/follow\_joint\_trajectory}} & \texttt{control\_msgs/FollowJointTrajectory} & Trajectory to move the torso \\ \hline
+\makecell{\texttt{/head/joint\_trajectory\_controller} \\ \texttt{/follow\_joint\_trajectory}} & \texttt{control\_msgs/FollowJointTrajectory} & Trajectory to move the head \\ \hline
+\end{tabular}
+}
+\end{table}
+
+The Arms, the Grippers and the sensor ring are similar to the torso and head, as they act as a service and receive the same message type. Their API is shown on \prettyref{tab:armapi}.
+
+\begin{table}[!ht]
+\caption{Arms and grippers command API.} \label{tab:armapi}
+\renewcommand*{\arraystretch}{1.1}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{c|c|c}
+Topic Name & Message Type & Information \\
+\hline
+\makecell{\texttt{/arm\_left/joint\_trajectory\_controller} \\ \texttt{/follow\_joint\_trajectory}} & \texttt{control\_msgs/FollowJointTrajectory} & Trajectory to move the left arm \\ \hline
+\makecell{\texttt{/gripper\_left} \\ \texttt{/joint\_trajectory\_controller} \\ \texttt{/follow\_joint\_trajectory}} & \texttt{control\_msgs/FollowJointTrajectory} & Trajectory to move the left gripper \\ \hline
+\makecell{\texttt{/arm\_right/joint\_trajectory\_controller} \\ \texttt{/follow\_joint\_trajectory}} & \texttt{control\_msgs/FollowJointTrajectory} & Trajectory to move the right arm \\ \hline
+\makecell{\texttt{/gripper\_right} \\ \texttt{/joint\_trajectory\_controller} \\ \texttt{/follow\_joint\_trajectory}} & \texttt{control\_msgs/FollowJointTrajectory} & Trajectory to move the right gripper \\ \hline
+\makecell{\texttt{/sensorring} \\ \texttt{/joint\_trajectory\_controller} \\ \texttt{/follow\_joint\_trajectory}} & \texttt{control\_msgs/FollowJointTrajectory} & Trajectory to move the sensor ring ring\\ \hline
+\end{tabular}
+}
+\end{table}
+
+For the sensors, there are three lasers scans that cover the entire circumference of the robot, shown on \prettyref{tab:laserapi}. Even though they are separate entities, there are nodes that transform the three different measurements into a single one for easier use later on.
+
+\begin{table}[!ht]
+\caption{Laser Scan API.} \label{tab:laserapi}
+\centering
+\renewcommand*{\arraystretch}{1.1}
+\begin{tabular}{c|c|c}
+Topic Name & Message Type & Information \\
+\hline
+\texttt{/base\_laser\_front/scan} & \texttt{sensor\_msgs/LaserScan} & Front laser scan \\ \hline
+\texttt{/base\_laser\_left/scan} & \texttt{sensor\_msgs/LaserScan} & Left laser scan \\ \hline
+\texttt{/base\_laser\_right/scan} & \texttt{sensor\_msgs/LaserScan} & Right laser scan \\ \hline
+\end{tabular}
+\end{table}
+
+There are also a cameras in the torso, head and in the sensor ring that collect both raw images and a Point Cloud representation that includes the distance of each point to the focal point of the camera. Their respective topics can be seen on \prettyref{tab:cameraapi}.
+
+\begin{table}[!ht]
+\caption{Cameras API.} \label{tab:cameraapi}
+\renewcommand*{\arraystretch}{1.1}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{c|c|c}
+Topic Name & Message Type & Information \\
+\hline
+\texttt{/torso\_cam3d\_left/rgb/image\_raw} & \texttt{sensor\_msgs/Image} & \makecell{Color image of the \\ left torso camera} \\ \hline
+\texttt{/torso\_cam3d\_left/depth\_registered/points} & \texttt{sensor\_msgs/PointCloud2} & \makecell{Depth data from \\ torso left camera} \\ \hline % left camera
+\texttt{/torso\_cam3d\_right/rgb/image\_raw} & \texttt{sensor\_msgs/Image} & \makecell{Color image of the \\ right torso camera} \\ \hline
+\texttt{/torso\_cam3d\_right/depth\_registered/points} & \texttt{sensor\_msgs/PointCloud2} & \makecell{Depth data from \\ torso right camera} \\ \hline % right camera
+\texttt{/torso\_cam3d\_right/rgb/image\_raw} & \texttt{sensor\_msgs/Image} & \makecell{Color image of the \\ down torso camera} \\ \hline
+\texttt{/torso\_cam3d\_down/depth\_registered/points} & \texttt{sensor\_msgs/PointCloud2} & \makecell{Depth data from \\ torso down camera} \\ \hline % down camera
+\texttt{/sensorring\_cam3d\_front/depth/points} & \texttt{sensor\_msgs/PointCloud2} & \makecell{Depth data from \\ sensor ring camera} \\ \hline
+\texttt{/sensorring\_cam3d\_back/rgb/image\_raw} & \texttt{sensor\_msgs/Image} & \makecell{Color image of the \\ back sensor ring camera} \\ \hline
+\texttt{/torso\_cam3d\_down/depth\_registered/points} & \texttt{sensor\_msgs/PointCloud2} & \makecell{Depth data from \\ back sensor ring camera} \\ \hline % sensor ring back camera
+\texttt{/head\_cam3d/rgb/image\_raw} & \texttt{sensor\_msgs/Image} & \makecell{Color image of the \\ head camera} \\ \hline % head camera
+\end{tabular}
+}
+\end{table}
+
+Finally, there are also other miscellaneous topics to control the lights and text-to-speak output and publish robot information, shown on \prettyref{tab:miscapi}.
+
+\begin{table}[!ht]
+\caption{Miscellaneous API.} \label{tab:miscapi}
+\centering
+\renewcommand*{\arraystretch}{1.1}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{c|c|c}
+Topic Name & Message Type & Information \\
+\hline
+\texttt{/joy} & \texttt{sensor\_msgs/Joy} & Input commands of joystick \\ \hline
+\texttt{/sound/say} & \texttt{cob\_sound/Say} & Text for text-to-speak output \\ \hline
+\texttt{/light\_base/set\_light} & \texttt{cob\_light/SetLightMode} & Command for base lights \\ \hline
+\texttt{/light\_torso/set\_light} & \texttt{cob\_light/SetLightMode} & Command for torso lights \\ \hline
+\texttt{/light\_torso/set\_light} & \texttt{cob\_light/SetLightMode} & Command for torso lights \\ \hline
+\texttt{/emergency\_stop\_state} & \texttt{cob\_msgs/EmergencyStopState} & \makecell{Laser and button \\ stop information.} \\ \hline
+\texttt{/power\_state} & \texttt{cob\_msgs/PowerState} & \makecell{Battery information.} \\ \hline
+\end{tabular}
+}
+\end{table}
