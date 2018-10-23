@@ -229,7 +229,17 @@ There are many pre-built plugins available at Gazebo library, including Cameras 
 
 %\section{OpenCV}
 
-%\section{MoveIT!}
+\section{MoveIt}
+
+MoveIt is a ROS library aimed at simplifying motion planning for complex robots. It is the evolution of \texttt{arm\_navigation} package, designed for motion planning, trajectory generation and environment monitoring for the PR2 robot \cite{chitta2012moveit}.
+
+One of the main requirements of robots working closely to humans and the dynamic environment is that they can detect and avoid collisions and other obstacles efficiently. MoveIt does this by creating a probabilistic 3D model of the environment using Octomaps. This is important because physical sensors have noise and inaccuracies, and the Octree representation is also much more efficient.
+
+With a model in hand, MoveIt can make use one of the available planners: Open Motion Planning Library (OMPL), Stochastic Trajectory Optimization for Motion Planning (STOMP), Search-Based Planning Library (SBPL), and Covariant Hamiltonian Optimization for Motion Planning (CHOMP). Having different planners available is important because they allow different movement constraints. One trajectory might need the manipulator to be always upright, like carrying liquids, while other doesn't have this constraints. MoveIt uses a configuration wizard to generate configuration files based on the URDF or SRDF robot model, making the package robot agnostic. In the configuration, the user can specify the attributes desired for the robot.
+
+The Self-collisions options allow you to select the density of the Self-collision matrix. Higher densities require more computation whereas lower densities might disable valid options. Virtual joints allows you to define which joints attach the robot to the world frame. Planning groups are used to virtually separate distinct parts of the robot, that may include creating joint groups on what composes the left arm, right arm, manipulator, etc. Robot poses defines fixed poses as reference for the robot, that may include \textit{Home} or \textit{Resting} positions. The End-effectors configuration is used to further specify which of the planning groups are end effectors, that may include tools and grippers. Finally, the passive joints configuration is used to specify the joints that cannot be actuated on, and thus cannot be used for motion planning.
+
+There are also plugins for RVIZ visualization of the planned trajectories. They help by providing visual tools to work with the robot, examining poses and testing trajectories behaviour. There are also many plugins available for Inverse Kinematics calculation, as well as wrappers to write your own solver.
 
 \section{COB}
 
@@ -249,9 +259,23 @@ The base features three steerable wheels used for moving the robot on the ground
 
 \subsection{Torso}
 
-The torso is linked with the base, and can be configured to be fixed (the torso doesn't move), to use a Pan joint (allowing for a full rotation) or using a spherical joint (providing 3DOF). It can have two optional arms with 7DOF, each with a manipulator finger with 2DOF. The arm is composed by three SCHUNK Powerball ERB modules and one PRL+ 100 module  in  the  shoulder. The manipulator was developed by Schunk especifically for this robot.
+The torso is linked with the base, and can be configured to be fixed (the torso doesn't move), to use a Pan joint (allowing for a full rotation) or using a spherical joint (providing 3DOF). It can have two optional arms with 7DOF, each with a manipulator finger with 2DOF.
 
 The manipulator also has a 3D camera and laser scanner for object recognition and picking, as well as LEDs for illumination. The torso also provides 3D cameras and sensors for computer vision activities that cover up the front of the robot, a LED Ring for signaling and an emergency stop.
+
+\subsection{Arms}
+
+The arm is composed by three SCHUNK Powerball ERB modules and one PRL+ 100 module  in  the  shoulder. The arm is a variation of the commercially available Schunk arm called LWA4P, that has 6 DOF and is composed by three Powerballs ERB, with 2 DOF each. The last degree of freedom is provided by the PRL+, allowing one rotation around the shoulder and totalling 7 DOF. \prettyref{fig:schunk_lwa4p_extended} shows the full arm in simulation. The manipulator finger was developed by Schunk specifically for this robot.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=.3\linewidth]{schunk_lwa4p_extended}
+    \caption{LWA4P extended arm.}
+    \label{fig:schunk_lwa4p_extended}
+\end{figure}
+
+The LWA4P arm was designed to operate at low power at battery dependant devices, and is capable of lifting a maximum payload of 6kg. Each joint in the Powerball is capable of rotating to $\pm 170^\circ$, at a maximum speed of $72^\circ /\text{s}$, and the overall repeat accuracy of the arm is $\pm 0.15 \ \text{mm}$.
+
 
 \subsection{Head}
 
