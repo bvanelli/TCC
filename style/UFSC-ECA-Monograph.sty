@@ -1,4 +1,3 @@
-
 \NeedsTeXFormat{LaTeX2e} 
 \ProvidesPackage{style/UFSC-ECA-Monograph}[2018/08/20]
 
@@ -98,7 +97,16 @@
 \newcommand{\membroc}[1]{\juryc{#1}}
 %------------------------------------------------------------
 
-\preambulo{Trabalho de Conclusão de Curso orientado pelo \imprimirorientador $\,$ intitulado ``\imprimirtitulo'' e apresentado à Universidade Federal de Santa Catarina, como parte dos requisitos necessários para a obtenção do Título de Bacharel em \deelcurso.}
+\preambulo{
+    \ifx\isenglish\undefined
+        Trabalho de Conclusão de Curso apresentado à Universidade Federal de Santa Catarina como parte dos requisitos necessários para a obtenção do Título de Engenheiro de Controle e Automação. \newline {\imprimirorientadorRotulo~\imprimirorientador\par} 
+    \else
+        Final paper submitted in partial fulfillment of the requirements
+for the degree of BEng. in Automation and Control Engineering of the Universidade Federal de Santa Catarina. \newline {Advisor: ~\imprimirorientador\par} 
+    \fi
+
+    }
+
 
 %%--------- Parametros da DEDICATÓRIA ----------
 \newcommand{\deelDEELdedicatoria}{}
@@ -129,54 +137,62 @@
 \newcommand{\abstrac}[1]{\renewcommand{\deelDEELabstract}{#1}}
 \newcommand{\DEELabstract}[1]{\abstrac{#1}}
 
+
 %--------- Formatação da CAPA da UFSC ----------
-% ************* CAPA UFSC **************
 \renewcommand{\imprimircapa}{%
   \begin{capa}%
 
     \begin{center}
-    {\large {\textbf{Universidade Federal de Santa Catarina}}\\
-	Campus Blumenau\\
-	Departamento de Engenharias}
+    \ABNTEXchapterfont\large { Universidade Federal de Santa Catarina\\
+    Centro de Blumenau\\
+	Departamento de Engenharia de \\Controle e Automação e Computação
+    
+    }
     \end{center}
 
-	\centering \textcolor{black}{\rule {16cm}{3.25pt}}
-				
-%	\vspace{0.5cm}
-    
+    \begin{figure}[!ht]
+        \centering
+        \includegraphics[width=.3\linewidth]{brasao_UFSC_vertical_sigla}
+    \end{figure}
+
+    \vspace{0.5cm}
     \center
+
     {\ABNTEXchapterfont\large\imprimirautor}
-     \vspace*{5cm}
+     \vspace*{3.5cm}
     
-    \ABNTEXchapterfont\bfseries\LARGE\imprimirtitulo
+    \ifx\isenglish\undefined
+        \ABNTEXchapterfont\large\imprimirtitulo
+    \else
+        \ABNTEXchapterfont\large\deeltitulouk
+    \fi
+    
     
     \vfill
 
-		\vspace*{\stretch{3}}
-			\textcolor{black}{\rule {16cm}{3.25pt}}
+
     {\large\imprimirlocal}
     \par
     {\large\imprimirdata}
     \vspace*{1cm}
   \end{capa}
 }
-%--------------- FIM da CAPA --------------------------
+
 
 % ----------  Formatação da FOLHA DE ROSTO da UFSC -----
-% ******** FOLHA DE ROSTO *********
 \makeatletter
 \renewcommand{\folhaderostocontent}{
 \begin{center}
-{\large {\textbf{Universidade Federal de Santa Catarina}}\\
-Campus Blumenau\\
-Departamentos de Engenharias}\\
-\textcolor{black}{\rule {16cm}{2.25pt}}
+    \textbf{\large\imprimirautor}
 
-\vspace*{1cm}
-    {\ABNTEXchapterfont\large\imprimirautor}
-\vspace{3.5cm}
+    \vspace{7cm}
     
-    {\ABNTEXchapterfont\bfseries\Large\imprimirtitulo}
+    \ifx\isenglish\undefined
+        \textbf{\Large\imprimirtitulo}
+    \else
+        \textbf{\Large\deeltitulouk}
+    \fi
+
     
 \vspace{2cm}
     
@@ -189,14 +205,16 @@ Departamentos de Engenharias}\\
        \vspace*{\fill}
     }%
     
-    {\abntex@ifnotempty{\imprimirinstituicao}{\imprimirinstituicao\vspace*{\fill}}}
-    {\large\imprimirorientadorRotulo~\imprimirorientador\par}
-    \abntex@ifnotempty{\imprimircoorientador}{%
-       {\large\imprimircoorientadorRotulo~\imprimircoorientador}%
-    }%
+
+    
+    {Universidade Federal de Santa Catarina\\
+        Centro de Blumenau\\
+	    Departamento de Engenharia de \\Controle e Automação e Computação
+    }
+    
     \vspace*{\fill}
     
-    \textcolor{black}{\rule {16cm}{2.25pt}}
+
 
     {\large\imprimirlocal}
     \par
@@ -207,10 +225,6 @@ Departamentos de Engenharias}\\
 \let\cleardoublepage\clearpage
 }
 \makeatother
-
-
-%----------------- Fim da FOLHA DE ROSTO ---------------------- 
-
 
 %%-----------Formatação da Ficha catalográfica da UEL ----------
 %%
@@ -235,7 +249,7 @@ Departamentos de Engenharias}\\
 }
 
 
-%-----------Formatação da FOLHA DE APROVAÇÃO da UEL ----------
+%-----------Formatação da FOLHA DE APROVAÇÃO ----------
 %
 \newcommand{\folhaaprovacao}{
 \newpage
@@ -246,20 +260,35 @@ Departamentos de Engenharias}\\
 \vspace*{0.75cm}
 
 \begin{center}
-{\LARGE\ABNTEXchapterfont\imprimirtitulo\par}
+    \ifx\isenglish\undefined
+        \LARGE\ABNTEXchapterfont\imprimirtitulo\par
+    \else
+        \LARGE\ABNTEXchapterfont\deeltitulouk\par
+    \fi
 \end{center}
 
 \vspace*{1cm}
 
+
 \begin{flushright}
 \begin{minipage}{11cm}
-Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Universidade Federal de Santa Catarina, como requisito parcial para a obtenção do título de Bacharel em \deelcurso.
+    \ifx\isenglish\undefined
+            {Trabalho de Conclusão de Curso apresentado à Universidade Federal de Santa Catarina como requisito parcial para a obtenção do título de Engenheiro de Controle e Automação.}
+        \else
+            {Final paper submitted in partial fulfillment of the requirements
+for the degree of BEng. in Automation and Control Engineering of the Universidade Federal de Santa Catarina.}
+        \fi
 \end{minipage}
 \end{flushright}
 \vspace*{0.4cm}
 
 \begin{flushright}
-\textbf{Comissão Examinadora}
+ \ifx\isenglish\undefined
+            \textbf{Comissão Examinadora}
+        \else
+            \textbf{Examination Committee}
+        \fi
+
 \end{flushright}
 \vspace*{-0.5cm}
 
@@ -276,12 +305,11 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
 
 \vspace*{2.5cm}
 \centerline{Blumenau, \today}
-
-\cleardoublepage
 }
 
 %-----------Formatação da Dedicatória ----------
 \newcommand{\textodedicatoria}{
+\newpage
 \if\DEELdedicatoria\@empty
 \else
   \newpage
@@ -292,18 +320,27 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
 \fi
 }
 
-%-----------Formatação da Dedicatória ----------
+
+%-----------Formatação dos Agradecimentos ----------
 \newcommand{\textoagradecimentos}{
+\newpage
 \if\DEELagradecimentos\@empty
 \else
-  \pretextualchapter{Agradecimentos}
+    \ifx\isenglish\undefined
+        \pretextualchapter{Agradecimentos}
+    \else
+        \pretextualchapter{Acknowledgements}
+    \fi
+  
   \deelDEELagradecimentos
-  \cleardoublepage
+  %\cleardoublepage
 \fi
 }
 
+
 %-----------Formatação da Epígrafe ----------
 \newcommand{\textoepigrafe}{
+\newpage
 \if\DEELepigrafe\@empty
 \else
   \newpage
@@ -311,41 +348,31 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
   \begin{flushright}
   \deelDEELepigrafe
   \end{flushright}
-  \cleardoublepage
+  %\cleardoublepage
 \fi
 }
 
+
 %-----------Formatação do Resumo ----------
 \newcommand{\textoresumo}{
-\newpage
-%\noindent {\imprimirautor}. {\textbf{\imprimirtitulo}}. \imprimirdata. 
-%\pageref{LastPage}~p.  Trabalho de Conclusão de Curso em \deelcurso \hspace{0.15cm} - Universidade Federal de Santa Catarina, \imprimirlocal.
-%\vspace{1.25cm}
-\begin{resumo}
-\deelDEELresumo \\
-\vspace{0.75cm}
-
-{\textbf{Palavras-Chave:}} \deelchave
-\end{resumo}
+    \newpage
+    \vspace{1.25cm}
+    \pretextualchapter{Resumo}
+    \deelDEELresumo\\
+    \vspace{0.75cm}
+    {\textbf{Palavras-Chave:}} \deelchave
 }
 
 
 %-----------Formatação do Abstract ----------
 \newcommand{\textoabstract}{
-%\noindent {\imprimirautor}. {\textbf{\deeltitulouk}}. \imprimirdata. 
-%\pageref{LastPage}~p. Monograph in Control and Automation Engineering - Federal University of Santa Catarina, \imprimirlocal.
-%\vspace{1.25cm}
-\begin{resumo}[Abstract]
-\foreignlanguage{english}{\deelDEELabstract}\\
-\vspace{0.75cm}
-
-{\textbf{Keywords:}} \deelkey
-\end{resumo}
+    \newpage
+    \vspace{1.25cm}
+    \pretextualchapter{Abstract}
+    \foreignlanguage{english}{\deelDEELabstract}\\
+    \vspace{0.75cm}
+    {\textbf{Keywords:}} \deelkey
 }
-
-%-----------Formatação das Referências ----------
-
-
 
 
 %-----------Formatação dos Elementos Pré-Textuais (na ordem) ----------
@@ -354,12 +381,11 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
 \imprimircapa                   % Obrigatório
 \imprimirfolhaderosto           % Obrigatório
 
-\DEELfichacatalografica     % Obrigatório
+%\DEELfichacatalografica     % Obrigatório
 
 \folhaaprovacao         % Obrigatório
 
 \textodedicatoria       % Opcional
-
 \textoagradecimentos    % Opcional
 \textoepigrafe          % Opcional
 \textoresumo            % Obrigatório
@@ -370,7 +396,8 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
 
 % sumário
 \newcommand{\Sumario}{
-\cleardoublepage
+%\cleardoublepage
+\newpage
 \ifx\isenglish\undefined
 \renewcommand{\contentsname}{Sumário}
 \else
@@ -381,6 +408,7 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
 }
 
 \newcommand{\ListaDeFiguras}{
+\newpage
 \ifx\isenglish\undefined
 \renewcommand{\listfigurename}{Lista de figuras}
 \renewcommand{\figurename}{Figura}
@@ -388,23 +416,24 @@ Trabalho de Conclusão de Curso apresentado ao Curso de \deelcurso \, da Univers
 \renewcommand{\listfigurename}{List of figures}
 \fi
 \listoffigures*
-\cleardoublepage
+%\cleardoublepage
 }
 
 \newcommand{\ListaDeTabelas}{
+\newpage
 \ifx\isenglish\undefined
 \renewcommand{\listtablename}{Lista de tabelas}
 \else
 \renewcommand{\listtablename}{List of tables}
 \fi
 \listoftables*
-\cleardoublepage
+%\cleardoublepage
 }
 
 % bibliografia
 \newcommand{\Bibliografia}[1]{
 \ifx\isenglish\undefined
-\renewcommand{\bibname}{\textbf{Referências}}
+\renewcommand{\bibname}{\textbf{Referências Bibliográficas}}
 \else
 \renewcommand{\bibname}{\textbf{References}}
 \fi
