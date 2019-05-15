@@ -38,8 +38,8 @@ In order for nodes to communicate, they interact publishing messages in topics. 
 % TODO: refazer imagem para evitar citação
 \begin{figure}[!ht]
 \centering
-\caption{Topic initialization.}
 \includegraphics[width=0.5\linewidth]{rostopic}
+\caption{Topic initialization.}
 \label{fig:rostopic}
 %\small{Source: ROSWiki.}
 \end{figure}
@@ -110,6 +110,20 @@ string message
 \end{lstlisting}
 
 This service is used for setting a boolean variable to \textit{true} or \textit{false}, that can be activating or deactivating an actuator. The response consists of a boolean that tells if the operation was successful and a message for better description in case of error.
+
+\section{Transformations}
+
+Transformations, or tfs, for short, are the way ROS deals with coordinates frames in space. As the poses for each link in the robot change over time, it keeps track of this changes and provides tools to assist the user to do transformations with the data.
+
+Suppose the robot has a fixed frame \texttt{/world} as a reference in the origin. Then, the center of the robot is another frame called \texttt{base\_link}. The transformation \texttt{/world -> /base\_link} would indicate the position of the robot in the world.
+
+Now, let's say the robot has a laser scanner sensor \texttt{/laser\_link} relative to \texttt{/base\_link}, as it is fixed on the robot. The laser makes a measurement and this result is relative to the laser position. Let's call the result \texttt{/result}. The result is then related to \texttt{/world} by a long chain of transformations.
+
+\begin{verbatim}
+/world -> /base_link -> /laser_link -> /result
+\end{verbatim}
+
+It can be tricky to transform the \texttt{/result} back to \texttt{/world} coordinates. The tf package gives the user an easy way of setting up a listener on the \texttt{/tf} topic that will listen to the published transforms and do the required transformations between coordinate frames, so the user can ask directly for the transform \texttt{/world -> result} instead of transforming the data himself.
 
 \section{Simulation}
 
@@ -192,7 +206,7 @@ All four engines are used to tackle different problems. By varying the time step
 
 Gazebo also allows sensors and actuators that will interact with the world and send data back to ROS packages. Sensors can include cameras, laser scanners, and actuators can include drive modules. The sensors are added in the SDF or URDF files. The example below shows the main guidelines to add a camera.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption=Camera Description., language=XML]
   <gazebo reference="camera_link">
     <sensor type="camera" name="camera1">
       <update_rate>30.0</update_rate>
@@ -229,17 +243,17 @@ There are many pre-built plugins available at Gazebo library, including Cameras 
 
 %\section{OpenCV}
 
-\section{MoveIt}
+%\section{MoveIt}
 
-MoveIt is a ROS library aimed at simplifying motion planning for complex robots. It is the evolution of \texttt{arm\_navigation} package, designed for motion planning, trajectory generation and environment monitoring for the PR2 robot \cite{chitta2012moveit}.
+%MoveIt is a ROS library aimed at simplifying motion planning for complex robots. It is the evolution of \texttt{arm\_navigation} package, designed for motion planning, trajectory generation and environment monitoring for the PR2 robot \cite{chitta2012moveit}.
 
-One of the main requirements of robots working closely to humans and the dynamic environment is that they can detect and avoid collisions and other obstacles efficiently. MoveIt does this by creating a probabilistic 3D model of the environment using Octomaps. This is important because physical sensors have noise and inaccuracies, and the Octree representation is also much more efficient.
+%One of the main requirements of robots working closely to humans and the dynamic environment is that they can detect and avoid collisions and other obstacles efficiently. MoveIt does this by creating a probabilistic 3D model of the environment using Octomaps. This is important because physical sensors have noise and inaccuracies, and the Octree representation is also much more efficient.
 
-With a model in hand, MoveIt can make use one of the available planners: Open Motion Planning Library (OMPL), Stochastic Trajectory Optimization for Motion Planning (STOMP), Search-Based Planning Library (SBPL), and Covariant Hamiltonian Optimization for Motion Planning (CHOMP). Having different planners available is important because they allow different movement constraints. One trajectory might need the manipulator to be always upright, like carrying liquids, while other doesn't have this constraints. MoveIt uses a configuration wizard to generate configuration files based on the URDF or SRDF robot model, making the package robot agnostic. In the configuration, the user can specify the attributes desired for the robot.
+%With a model in hand, MoveIt can make use one of the available planners: Open Motion Planning Library (OMPL), Stochastic Trajectory Optimization for Motion Planning (STOMP), Search-Based Planning Library (SBPL), and Covariant Hamiltonian Optimization for Motion Planning (CHOMP). Having different planners available is important because they allow different movement constraints. One trajectory might need the manipulator to be always upright, like carrying liquids, while other doesn't have this constraints. MoveIt uses a configuration wizard to generate configuration files based on the URDF or SRDF robot model, making the package robot agnostic. In the configuration, the user can specify the attributes desired for the robot.
 
-The Self-collisions options allow you to select the density of the Self-collision matrix. Higher densities require more computation whereas lower densities might disable valid options. Virtual joints allows you to define which joints attach the robot to the world frame. Planning groups are used to virtually separate distinct parts of the robot, that may include creating joint groups on what composes the left arm, right arm, manipulator, etc. Robot poses defines fixed poses as reference for the robot, that may include \textit{Home} or \textit{Resting} positions. The End-effectors configuration is used to further specify which of the planning groups are end effectors, that may include tools and grippers. Finally, the passive joints configuration is used to specify the joints that cannot be actuated on, and thus cannot be used for motion planning.
+%The Self-collisions options allow you to select the density of the Self-collision matrix. Higher densities require more computation whereas lower densities might disable valid options. Virtual joints allows you to define which joints attach the robot to the world frame. Planning groups are used to virtually separate distinct parts of the robot, that may include creating joint groups on what composes the left arm, right arm, manipulator, etc. Robot poses defines fixed poses as reference for the robot, that may include \textit{Home} or \textit{Resting} positions. The End-effectors configuration is used to further specify which of the planning groups are end effectors, that may include tools and grippers. Finally, the passive joints configuration is used to specify the joints that cannot be actuated on, and thus cannot be used for motion planning.
 
-There are also plugins for RVIZ visualization of the planned trajectories. They help by providing visual tools to work with the robot, examining poses and testing trajectories behaviour. There are also many plugins available for Inverse Kinematics calculation, as well as wrappers to write your own solver.
+%There are also plugins for RVIZ visualization of the planned trajectories. They help by providing visual tools to work with the robot, examining poses and testing trajectories behaviour. There are also many plugins available for Inverse Kinematics calculation, as well as wrappers to write your own solver.
 
 \section{COB}
 
@@ -255,7 +269,7 @@ The Care-o-bot is a project for a mobile assistive robot that is modular, develo
 
 \subsection{Base}
 
-The base features three steerable wheels used for moving the robot on the ground. The robot has three wheels so that it can move freely on the ground. Because the modularity, the wheels can be configured to behave using Ackermann kinematics, moving forwards and backwards and rotating on the vertival axis, but also Omnidirectional kinematics, allowing the robot to move in every direction at a maximum speed of 1,1 m/s. It is also equipped with 2D laser scanners with 360$^{\circ}$ coverage for object detection and safety, and the battery for the robot and the control panel.
+The base features three steerable wheels used for moving the robot on the ground. The robot has three wheels so that it can move freely on the ground. Because the modularity, the wheels can be configured to behave using Ackermann kinematics, moving forwards and backwards and rotating on the vertival axis, but also Omnidirectional kinematics, allowing the robot to move in every direction at a maximum speed of 1,1 m/s. It is also equipped with three 2D laser scanners with 360$^{\circ}$ coverage for object detection and safety, and the battery for the robot and the control panel.
 
 \subsection{Torso}
 
