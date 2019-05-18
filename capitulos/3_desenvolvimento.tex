@@ -234,7 +234,7 @@ The most natural way of analyzing the poses is the squared error from the pose e
  
  \begin{itemize}
      \item Algorithms available in ROS will be used, to ensure every algorithm is publicly available for testing.
-     \item Several runs will be done using different parameters for each algorithm and different routes to ensure no algorithm will be favored. In each run, each algorithm will receive the same working data in the form as ROS bags.
+     \item Different maps will be tested to ensure no algorithm is favored. In each run, each algorithm will receive the same working data in the form as ROS bags.
      \item The scenario will be simulated in a map carefully generated using a public tool, to make sure everyone can generate the same testing data. Even though there are differences between simulation and reality, it is the only way to acquire real ground-truth data for the environment.
      \item Maps will test the ability for the algorithm to do accurate mapping, accurate localization and loop-closure. Different measurement techniques will be used to ensure all this three aspects of each map are analysed.
  \end{itemize}
@@ -306,7 +306,7 @@ Each wall can be represented by the XML shown in Listing~\ref{lst:sdf_body}. Eac
         </link>
 \end{lstlisting}
 
-\section{Selecting maps}
+\section{Selecting maps}\label{sec:selecting_maps}
 
 The maps have to be selected to be include the scenarios encountered in real life. We selected three maps shown in \prettyref{fig:generated_maps}.
 
@@ -546,10 +546,84 @@ When the node is shutdown, the following tasks are executed:
     \item The pose history is plotted alongside the ground truth.
     \item The squared pose error is calculated according to \prettyref{eq:error_squared}.
     \item The displacement pose error is calculated according to \prettyref{eq:displacement}.
-    \item The CPU and Memory usage are plotted over time.
+    \item The CPU and Memory usage are plotted over time, using \texttt{psutil} library \cite{psutil}.
     \item The summary is generated including: the average CPU usage, average Memory usage, translation displacement error, rotation displacement error, translation squared error, rotational squared error.
 \end{itemize}
 
 \section{Exporting the map}
 
+The map can be exported using the the \texttt{map\_saver} node from the package \texttt{map\_server}. To export the map, simply call the node with the option \texttt{-f} and the map name.
+
+\begin{verbatim}
+rosrun map_server map_saver -f map_name
+\end{verbatim}
+
+Since Cartographer uses a different approach for generating submaps, the data has to be saved as a \texttt{.pbstream} first to generate the full map. To generate the map, we first have to tell the node to finish the trajectory calling the \texttt{/finish\_trajectory} service. Then, we export the \texttt{.pbstream} file and use it to generate the map. The following sequence of commands represent this process:
+
+\begin{verbatim}
+rosservice call /finish_trajectory 0
+rosservice call /write_state "filename: '${HOME}/file.pbstream'"
+rosrun cartographer_ros cartographer_pbstream_to_ros_map 
+       -pbstream_filename ${HOME}/file.pbstream
+\end{verbatim}
+
+Because the resulting map doesn't always have the right size (approximately same as the ground truth map), we have to crop the empty gray areas before running the map comparisons. We also want to convert from \texttt{.pgm} saved automatically to \texttt{.png} that the algorithm expects. To do that, we simply call the conversion function from ImageMagick. Why the image is rotated 90 degrees is explained in the next section.
+
+\begin{verbatim}
+convert -rotate 90 map_name.pgm -trim map_name.png
+\end{verbatim}
+
 \section{Running ICP on resulting map}
+
+Once the map is saved, we have both the reference map and the generated map, as shown in \prettyref{fig:reference_map_icp}. We can then run an algorithm to align the maps properly, as suggested by \citeauthor{santos2013evaluation}.
+
+\begin{figure}[!ht]
+     \centering
+     \subfloat[][]{\includegraphics[width=.3\linewidth]{test1_cropped}\label{subfig:test1_cropped}}
+     \hspace{2cm}
+     \subfloat[][]{\includegraphics[width=.3\linewidth]{gmapping_test1}\label{subfig:test1_gmapping}}
+     \caption{Ground truth (left) and SLAM generated map (right).}
+     \label{fig:reference_map_icp}
+\end{figure}
+
+First, both maps are imported as a point cloud, each pixel representing a point in space, as shown in \prettyref{fig:point_cloud}. As you can probably tell, the image is twisted 90 degrees counter-clockwise when being read by the algorithm. This happens because the coordinate system for images is not the same as the Cartesian coordinate system.
+
+\begin{figure}[!ht]
+     \centering
+     \subfloat[][]{\includegraphics[width=.45\linewidth]{original_pcl}\label{subfig:original_pcl}}
+     \hspace{0cm}
+     \subfloat[][]{\includegraphics[width=.45\linewidth]{map_pcl}\label{subfig:map_pcl}}
+     \caption{Ground truth (left) and SLAM generated map (right) represented in point clouds.}
+     \label{fig:point_cloud}
+\end{figure}
+
+ICP, or Iteractive Closest Point, is a state-of-the-art way of aligning 3D meshes. It works by finding the transformation that best aligns two distinct point clouds minimizing the error distance between them. For more information about ICP, refer to \citeauthor{besl1992method}.
+
+The ICP algorithm used is the one provided by \citeauthor{flannigan2019}. It will calculate the transformation that best aligns the two maps shown in \prettyref{fig:point_cloud}. With the maps aligned, we then use the following equation to calculate the error metric, where P is the number of points in \figurename~\ref{subfig:map_pcl}, $p_i$ represents one point in the data set and $p_i^*$ is the nearest neighbour of $p_i$ in the dataset shown on \figurename~\ref{subfig:original_pcl}.
+
+\begin{equation}
+\epsilon(\text{map}) = \frac{1}{P} \sum_{i=1}^P dist(p_i - p_i^*(p_i))^2
+\end{equation}
+
+The aligned point cloud can be seen on \prettyref{fig:alignment_pcl}. To do that, we simply call the node launcher with the desired map and algorithm.
+
+\begin{verbatim}
+roslaunch cob_bringup_sim icp_map_comparison.launch map:=test1 slam:=gmapping
+\end{verbatim}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.45\linewidth]{alignment_pcl}
+    \caption{Alignment of point clouds from \prettyref{fig:point_cloud}.}
+    \label{fig:alignment_pcl}
+\end{figure}
+
+\section{Comparing free space} \label{sec:free_space}
+
+As important as placing the walls in the correct spots, metric that will be checked using ICP, is modeling free space correctly, where the robot can move. This is done by each algorithm by setting the pixels that are free as white. Those white pixels can be counted and checked against the free space in the original map. Since we only want a measurement of scale, we can use the following formula, where $w_o$ is the amount of white pixels in the original image and $w_m$ is the amount of pixels in the map generated by SLAM:
+
+\begin{equation}
+\epsilon(\text{space}) = \frac{w_o - w_m}{w_o} \times 100
+\end{equation}
+
+The signal of the result will also give indications about the mapping. If it is positive, it means that the original map has more white pixels than the mapped result, meaning the SLAM was more conservative and mapped less space than there is available. If it's negative, the algorithm actually mapped spaced that is not there, meaning the navigation layer will later on have to deal with this problem.
