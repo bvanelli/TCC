@@ -2,7 +2,7 @@
 
 One of the first challenges in indoor navigation for assistive robots is actually finding where they are. Robot localization is fundamental to not only know where you need to go, but rather find a path there that avoids the obstacles.
 
-Mapping is an essential tool in this matter, and it comprises the areas of \textit{concurrent mapping} and \textit{localization problem}. On themselves, both problems are relatively easy and well understood: mapping an environment knowing the localization and localizing the robot having the map in hands are simple tasks, however the combination of those two problems is hard to solve \cite{thrun2000real}.
+Mapping is an essential tool in this matter, and it comprises the areas of \textit{concurrent mapping} and \textit{localization problem}. In themselves, both problems are relatively easy and well understood: mapping an environment knowing the localization and localizing the robot having the map in hands are simple tasks. However, the combination of those two problems is hard to solve \cite{thrun2000real}.
 
 Many SLAM (Simultaneous Localization and
 Map Building) algorithms emerged to try and solve these problems, using different approaches and range of sensors to do the task. Some even evolved fusing data from different sensors to provide higher precision. They often rely on assumptions about the system nature. Most of the algorithms assume that the noise can be modeled  as a gaussian. Others might assume that the movement is linear and apply Kalman Filters to predict the current state.
