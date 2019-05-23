@@ -13,27 +13,27 @@
 
 \section{ROS}
 
-There are many problems when developing robot applications, especially because the complexity of those systems. ROS is not an operating system per say, but a framework that allows coders to readily develop and test solutions with modularity and code reusability in mind. It was built in a agnostic package system that allows integration from many packages available from the ROS Open-source community, many of them implementing support libraries and proof-of-concept algorithms, as well as core infrastructure.
+There are many problems when developing robot applications, especially because of the complexity of those systems. ROS is not an operating system per se, but a framework that allows coders to readily develop and test solutions with modularity and code reusability in mind. It was built in an agnostic package system that allows integration from many packages available from the ROS Open-source community, many of them implementing support libraries and proof-of-concept algorithms, as well as core infrastructure.
 
 The main aspects of ROS are \cite{quigley2009ros}:
 
 \begin{itemize}
 \item Peer-to-peer: even though the ROS framework relies on a master or namespace as a lookup mechanism, the communication is established between peers, avoiding unnecessary routing through slow links when the recipient is on the subnet.
-\item Tools-based: instead of building an intricate framework, ROS instead relies on a set of tools written to perform task, including various tools for compilation, tap data stream, data plotting, configuration, documentation generation, etc.
-\item Multi-lingual: since communication between nodes relies only on XML-RPC, they can be implemented in any language, either by explicitly writing the full library that interacts with roscore or building a wrapper for the ROS C++ library.
-\item Thin: many robots implementations have parts of code that could be reused in other project if they weren't so entangled with all existing code. ROS proposes an architecture where code is separated into packages that holds no dependency on ROS. All packages can be built individually using one CMake each, different from the traditional software paradigm where one CMake file builds the entire project.
+\item Tools-based: instead of building an intricate framework, ROS instead relies on a set of tools written to perform a task, including various tools for compilation, tap data stream, data plotting, configuration, documentation generation, etc.
+\item Multi-lingual: since communication between nodes relies only on XML-RPC, they can be implemented in any language, either by explicitly writing the full library that interacts with the ROS Core or building a wrapper for the ROS C++ library.
+\item Thin: many robots implementations have parts of the code that could be reused in another project if they weren't so entangled with all existing code. ROS proposes an architecture where the code is separated into packages that hold no dependency on ROS. All packages can be built individually using CMake, different from the traditional software paradigm where one CMake file builds the entire project.
 \item Free and Open-source: ROS source code is publicly available and released under the BSD License, allowing copy and redistribution of the source code, including for commercial purposes.
 \end{itemize}
 
 \subsection{Packages}
 
-In order to better build robotic system, ROS adopts a packaged architecture, making every subsystem of the application run separately from all the others. Every package can contain new nodes, libraries, configuration or even datasets.
+In order to better build robotic systems, ROS adopts a packaged architecture, making every subsystem of the application run separately from all the others. Every package can contain new nodes, libraries, configuration or even datasets.
 
-The main advantage of this approach is making code more organized in it's own subsystems and sub-subsystems, that specialize in doing an specific task very well so that other packages can use this functionality. Packages can also be written independently of language, as long as it's supported by ROS.
+The main advantage of this approach is making the code more organized in its own subsystems and sub-subsystems, that specialize in doing a specific task very well so that other packages can use this functionality. Packages can also be written independently of language, as long as it's supported by ROS.
 
 \subsection{Topics}
 
-In order for nodes to communicate, they interact publishing messages in topics. Topics are anonymous buses where each node can publish messages following the message type standards. Each node can then subscribe to topics that are relevant to them and act upon data captured on the topic. Message can even be recorded and played back to support applications that will need the information later in time.
+In order for nodes to communicate, they interact by publishing messages in topics. Topics are anonymous buses where each node can publish messages following the message type standards. Each node can then subscribe to topics that are relevant to them and act upon data captured on the topic. Message can even be recorded and played back to support applications that will need the information later in time.
 
 % TODO: refazer imagem para evitar citação
 \begin{figure}[!ht]
@@ -44,23 +44,23 @@ In order for nodes to communicate, they interact publishing messages in topics. 
 %\small{Source: ROSWiki.}
 \end{figure}
 
-The topics are implemented in a XML-RPC protocol, using a master node in order to provide name resolution. In order for a publisher connect to a subscriber, they do the following steps:
+The topics are implemented in the XML-RPC protocol, using a master node in order to provide name resolution. In order for a publisher to connect to a subscriber, they do the following steps:
 
 \begin{enumerate}
 \item Subscriber register with the master the topics it will be listening to.
 \item Publisher register with the master the topics it will be publishing to.
-\item Master informs subscriber of a new publisher.
-\item Subscriber request a topic connection with the Publisher and negotiates a transport protocol.
+\item Master informs the subscriber of a new publisher.
+\item Subscriber requests a topic connection with the Publisher and negotiates a transport protocol.
 \item Subscriber connects using the selected protocol.
 \end{enumerate}
 
-It's important to notice that, once the connection is established, the communication is maintained peer-to-peer, using former protocols like TCPROS, built over TCP/IP, and UDPROS, built over UDP. This not only provides faster communication inside the same network by not requiring the messages to be relayed through the master, but also enables communication through available networks of the Internet protocol suite, including 802.11X wireless transmission.
+It's important to notice that, once the connection is established, the communication is maintained peer-to-peer, using former protocols like TCPROS, built over TCP/IP, and UDPROS, built over UDP. This not only provides faster communication inside the same network by not requiring the messages to be relayed through the master but also enables communication through available networks of the Internet protocol suite, including 802.11X wireless transmission.
 
 The topic configuration also enables true agnostic packages, since the communication between them will be done using a standardized communication medium, loosely coupling the packages and making them easily maintainable. Debugging can also be done using command-line tools that wiretap this medium and display the information exchanged by nodes.
 
 \subsection{Services}
 
-The topic communication can be very useful in many-to-many communication, but lacks support when sending messages or commands that require a response. When a reply is needed, it is a better practice to use services instead of topics. This is especially true for tasks that need a lot of computing power but only need to be executed once in a while, so instead of calculating it in every iteration, the service can be run just when requested and return data to the caller. The request is usually done in a similar way to Remote Procedure Calls (RPCs) in programming languages.
+The topic communication can be very useful in many-to-many communication but lacks support when sending messages or commands that require a response. When a reply is needed, it is a better practice to use services instead of topics. This is especially true for tasks that need a lot of computing power but only need to be executed once in a while, so instead of calculating it in every iteration, the service can be run just when requested and return data to the caller. The request is usually done in a similar way to Remote Procedure Calls (RPCs) in programming languages.
 
 \subsection{Message types}
 
@@ -127,20 +127,20 @@ It can be tricky to transform the \texttt{/result} back to \texttt{/world} coord
 
 \section{Simulation}
 
-Since deploying a test robot at every code change is not possible, and ROS only provides the tools to develop a robot system solution, there is a need for offline simulation of the robots, avoiding having to test every configuration on physical hardware. In this cases, it can be helpful to set up a rigid body simulation. The normal workflow for setting up a simulation is:
+Since deploying a test robot at every code change is not possible, and ROS only provides the tools to develop a robot system solution, there is a need for offline simulation of the robots, avoiding having to test every configuration on physical hardware. In these cases, it can be helpful to set up a rigid body simulation. The normal workflow for setting up a simulation is:
 
 % http://ode.org/slides/slide2.html
 \begin{itemize}
     \item Isolating the important variables in the physical process.
-    \item Model the physical system behaviour using equations.
+    \item Model the physical system behavior using equations.
     \item Find a method to solve the equations, given the inputs and the initial state of the system.
     \item Write a computer program that can do that simulation.
     \item Simulate and benchmark the results against the physical system.
 \end{itemize}
 
-Repeating all this five steps for every physical system will lead to the best results, but can be time consuming and difficult because all the variables involved. But since the possibilities for a robot system are often limited, physics engines or physics SDKs (source development kits) were developed to aid simulation.
+Repeating all these five steps for every physical system will lead to the best results, but can be time-consuming and difficult because all the variables involved. But since the possibilities for a robot system are often limited, physics engines or physics SDKs (source development kits) were developed to aid simulation.
 
-While the real world has a lot of complexity, rigid body dynamics can be simplified in rigid bodies, joints, collisions, friction and springs, elements that are important to the process. The physical model can be reduced to the laws of motion, using mass, velocity, acceleration and force as simulation variables. Since the model and the solution to these problems are well known, generalized solvers can be written that compute the simulation at each instant of time, or timesteps.
+While the real world has a lot of complexity, rigid body dynamics can be simplified in rigid bodies, joints, collisions, friction and springs, elements that are important to the process. The physical model can be reduced to the laws of motion, using mass, velocity, acceleration, and force as simulation variables. Since the model and the solution to these problems are well known, generalized solvers can be written that compute the simulation at each instant of time, or time steps.
 
 Many simulators implement this generalized solvers, as well as render the 3D models to show to the user, including game engines like Unity and USARSim (based on Unreal engine), commercial solutions like Microsoft Robot Studio, Webots and MATLAB, and open-source projects like Gazebo \cite{craighead2007survey}. Since Gazebo adopts the mentality of the ROS project of being open and free, it became widely used in the community, and as a result better developed over time.
 
@@ -162,7 +162,7 @@ The Gazebo simulator offers:
 \item Robot Models, including ones from the community.
 \end{itemize}
 
-All the robot description is made using a URDF file or a SDF file. The URDF or Universal Robotic Description Format file is a XML file describing all elements of the robot. Even though it's called ``Universal'', it lacks some of the features like parallel linkages, friction, etc. To get around this issues, a new model called SDF or  Simulation Description Format was developed specifically for use in Gazebo, while the URDF was maintained for backward compatibility. Every time an URDF file is loaded it is converted by Gazebo to an SDF equivalent.
+All the robot description is made using a URDF file or an SDF file. The URDF or Universal Robotic Description Format file is an XML file describing all elements of the robot. Even though it's called ``Universal'', it lacks some of the features like parallel linkages, friction, etc. To get around these issues, a new model called SDF or  Simulation Description Format was developed specifically for use in Gazebo, while the URDF was maintained for backward compatibility. Every time a URDF file is loaded, it is converted by Gazebo to an SDF equivalent.
 
 \subsection{URDF}
 
@@ -175,36 +175,36 @@ The URDF must start describing each link and it's inertia.  \prettyref{fig:gazeb
 \label{fig:gazebo-stl}
 \end{figure}
 
-The inertia is described by it's inertial parameters, formerly the mass, center of mass and Moment of Inertia Matrix. Additionally, you specify a collision box that will aid collision testing in simulation. You can then describe the rest of the robot, including the joints that will hold links together. Two basic joints can be seen, \texttt{wheel\_left\_joint} and \texttt{wheel\_right\_joint}, the hold all three links together. Finally, the plugins will give the robot the simulation functionality, adding IMUs, Laser Scanners, Cameras, etc.
+The inertia is described by its inertial parameters, formerly the mass, center of mass and Moment of Inertia Matrix. Additionally, you specify a collision box that will aid collision testing in simulation. You can then describe the rest of the robot, including the joints that will hold links together. Two basic joints can be seen, \texttt{wheel\_left\_joint} and \texttt{wheel\_right\_joint}, that hold all three links together. Finally, the plugins will give the robot the simulation functionality, adding IMUs, Laser Scanners, Cameras, etc.
 
 \subsection{SDF}
 
-The SDF is an improvement of the URDF descriptor format that supports more functionality. It not only supports all the physical descriptions shown in the URDF model, but also features:
+The SDF is an improvement of the URDF descriptor format that supports more functionality. It not only supports all the physical descriptions shown in the URDF model but also features:
 
 \begin{itemize}
-\item World information, from lightning and gravity to complex information like magnetic fields, winds and atmosphere (temperature and pressure).
+\item World information, from lightning and gravity to complex information like magnetic fields, winds, and atmosphere (temperature and pressure).
 \item Scene information, like ambient, background, sky, fog and shadows.
 \item Multiple robots descriptors.
-\item Choosing physics engine.
+\item Choosing a physics engine.
 \end{itemize}
 
 \subsection{Physics Engines}
 
-In order to simulate the physical conditions of the robot and the environment, Gazebo supports four different physics engines: ODE, Bullet, Simbody and DART. At the start of each simulation, the user can select the desired physics engine changing the startup flags for the program or configure it on the SDF file.
+In order to simulate the physical conditions of the robot and the environment, Gazebo supports four different physics engines: ODE, Bullet, Simbody, and DART. At the start of each simulation, the user can select the desired physics engine changing the startup flags for the program or configure it on the SDF file.
 
 ODE or Open Dynamics Engine is an engine for simulating articulated rigid body structures. It features a stable integrator, meaning that numeric errors shouldn't grow out of control. Because of that, the simulator drops physical accuracy in favor of speed, stability and robustness \cite{smith2005open}.
 
-Bullet is a Python implementation of physics simulation for robotics, games and visual effect that provides forward and inverse dynamics and kinematics, as well as built in collision detection. Bullet differentiates itself by being easy to use and provide integration to machine learning frameworks like TensorFlow \cite{coumans2018}.
+Bullet is a Python implementation of physics simulation for robotics, games and visual effect that provides forward and inverse dynamics and kinematics, as well as built-in collision detection. Bullet differentiates itself by being easy to use and provides integration to machine learning frameworks like TensorFlow \cite{coumans2018}.
 
-Simbody is a multibody simulator focused on biomedical research. It was developed to better suit simulation scenarios where engines like ODE may not converge to correct results because of lack of fidelity in favor of real-time performance. It is used for neuromuscular, prosthetic, and biomolecular simulation, as well as design and control of humanoid robots \cite{sherman2011simbody}.
+Simbody is a multibody simulator focused on biomedical research. It was developed to better suit simulation scenarios where engines like ODE may not converge to correct results because of the lack of fidelity in favor of real-time performance. It is used for neuromuscular, prosthetic, and biomolecular simulation, as well as design and control of humanoid robots \cite{sherman2011simbody}.
 
-DART or Dynamic Animation and Robotics Toolkit is another rigid body simulation that distinguishes itself by accuracy and stability. The main purpose of this simulator is providing full access to internal kinematic and dynamic quantities \cite{lee2018dart}.
+DART or Dynamic Animation and Robotics Toolkit is another rigid body simulation that distinguishes itself by accuracy and stability. The main purpose of this simulator is providing full access to internal kinematic and dynamic quantities so that they can be modified by the user as needed \cite{lee2018dart}.
 
-All four engines are used to tackle different problems. By varying the time step, for instance, the you might obtain better results in your simulation with one of the engines. Usually, when choosing the simulation engine, the relation between number of iterations, error and speed must be taken into account. Some of the simulations require better precision, while others may require real time performance. For a more in depth comparison of the four engines, see \cite{peters2014comparison}.
+All four engines are used to tackle different problems. By varying the time step, for instance, you might obtain better results in your simulation with one of the engines. Usually, when choosing the simulation engine, the relationship between the number of iterations, error, and speed must be taken into account. Some of the simulations require greater precision, while others may require real-time performance. For a more in-depth comparison of the four engines, see \cite{peters2014comparison}.
 
 \subsection{Sensors and actuators}
 
-Gazebo also allows sensors and actuators that will interact with the world and send data back to ROS packages. Sensors can include cameras, laser scanners, and actuators can include drive modules. The sensors are added in the SDF or URDF files. The example below shows the main guidelines to add a camera.
+Gazebo also allows sensors and actuators that will interact with the world and send data back to ROS packages. Sensors can include cameras, laser scanners, and actuators that can include drive modules. The sensors are added in the SDF or URDF files. The example below shows the main guidelines to add a camera.
 
 \begin{lstlisting}[caption=Camera Description., language=XML]
   <gazebo reference="camera_link">
@@ -237,7 +237,7 @@ Gazebo also allows sensors and actuators that will interact with the world and s
   </gazebo>
 \end{lstlisting}
 
-Notice that it must include values for image size and update rate on the sensor type. The controller is loaded from a plugin called \texttt{libgazebo\_ros\_camera.so}, that uses as parameters which topic the camera will correspond to and the intrinsic parameters of the lenses, as well as the link the camera will be attached to.
+Notice that it must include values for image size and update rate on the sensor type. The controller is loaded from a plugin called \texttt{libgazebo\_ros\_camera.so} and uses as parameters which topic the camera will correspond to and the intrinsic parameters of the lenses, as well as the link the camera will be attached to.
 
 There are many pre-built plugins available at Gazebo library, including Cameras (mono and stereo), Kinect, Laser Scanner, Force and IMU sensors, Differential Drive, Skid Steering Drive, as well as templates to write your own dedicated plugin.
 
@@ -253,11 +253,11 @@ There are many pre-built plugins available at Gazebo library, including Cameras 
 
 %The Self-collisions options allow you to select the density of the Self-collision matrix. Higher densities require more computation whereas lower densities might disable valid options. Virtual joints allows you to define which joints attach the robot to the world frame. Planning groups are used to virtually separate distinct parts of the robot, that may include creating joint groups on what composes the left arm, right arm, manipulator, etc. Robot poses defines fixed poses as reference for the robot, that may include \textit{Home} or \textit{Resting} positions. The End-effectors configuration is used to further specify which of the planning groups are end effectors, that may include tools and grippers. Finally, the passive joints configuration is used to specify the joints that cannot be actuated on, and thus cannot be used for motion planning.
 
-%There are also plugins for RVIZ visualization of the planned trajectories. They help by providing visual tools to work with the robot, examining poses and testing trajectories behaviour. There are also many plugins available for Inverse Kinematics calculation, as well as wrappers to write your own solver.
+%There are also plugins for RVIZ visualization of the planned trajectories. They help by providing visual tools to work with the robot, examining poses and testing trajectories behavior. There are also many plugins available for Inverse Kinematics calculation, as well as wrappers to write your own solver.
 
 \section{COB}
 
-The Care-o-bot is a project for a mobile assistive robot that is modular, developed and maintained by Fraunhofer IPA. The COB version 4 can be seen on \prettyref{fig:cob4}. The robot was composed not only to provide researchers a reliable mobile base, but also to aid research on human-robot interaction and social behavior \cite{mci/Kittmann2015}. It is composed mainly by a mobile base, a torso and a head.
+The Care-o-bot is a project for a mobile assistive robot that is modular, developed and maintained by Fraunhofer IPA. The COB version 4 can be seen on \prettyref{fig:cob4}. The robot was composed not only to provide researchers a reliable mobile base, but also to aid research on human-robot interaction and social behavior \cite{mci/Kittmann2015}. It is composed mainly by a mobile base, a torso, and a head.
 
 % TODO: editar a imagem para conter descrição de partes
 \begin{figure}[!ht]
@@ -269,17 +269,17 @@ The Care-o-bot is a project for a mobile assistive robot that is modular, develo
 
 \subsection{Base}
 
-The base features three steerable wheels used for moving the robot on the ground. The robot has three wheels so that it can move freely on the ground. Because the modularity, the wheels can be configured to behave using Ackermann kinematics, moving forwards and backwards and rotating on the vertival axis, but also Omnidirectional kinematics, allowing the robot to move in every direction at a maximum speed of 1,1 m/s. It is also equipped with three 2D laser scanners with 360$^{\circ}$ coverage for object detection and safety, and the battery for the robot and the control panel.
+The base features three steerable wheels used for moving the robot on the ground. Because the modularity, the wheels can be configured to behave using Ackermann kinematics, moving forward and backward and rotating on the vertical axis, but also Omnidirectional kinematics, allowing the robot to move in every direction. The maximum speed supported is 1,1 m/s. It is also equipped with three 2D laser scanners with 360$^{\circ}$ coverage for object detection and safety, and the battery for the robot and the control panel.
 
 \subsection{Torso}
 
 The torso is linked with the base, and can be configured to be fixed (the torso doesn't move), to use a Pan joint (allowing for a full rotation) or using a spherical joint (providing 3DOF). It can have two optional arms with 7DOF, each with a manipulator finger with 2DOF.
 
-The manipulator also has a 3D camera and laser scanner for object recognition and picking, as well as LEDs for illumination. The torso also provides 3D cameras and sensors for computer vision activities that cover up the front of the robot, a LED Ring for signaling and an emergency stop.
+The manipulator also has a 3D camera and laser scanner for object recognition and picking, as well as LEDs for illumination. The torso also provides 3D cameras and sensors for computer vision activities that cover up the front of the robot and an LED Ring for signaling and an emergency stop.
 
 \subsection{Arms}
 
-The arm is composed by three SCHUNK Powerball ERB modules and one PRL+ 100 module  in  the  shoulder. The arm is a variation of the commercially available Schunk arm called LWA4P, that has 6 DOF and is composed by three Powerballs ERB, with 2 DOF each. The last degree of freedom is provided by the PRL+, allowing one rotation around the shoulder and totalling 7 DOF. \prettyref{fig:schunk_lwa4p_extended} shows the full arm in simulation. The manipulator finger was developed by Schunk specifically for this robot.
+The arm is composed of three SCHUNK Powerball ERB modules and one PRL+ 100 module, a rotary actuator, in the shoulder. The arm is a variation of the commercially available Schunk arm called LWA4P, which has 6 DOF and is composed of three Powerball ERB, with 2 DOF each. The last degree of freedom is provided by the PRL+, allowing one rotation around the shoulder and totaling 7 DOF. \prettyref{fig:schunk_lwa4p_extended} shows the full arm in simulation. The manipulator's finger was developed by Schunk specifically for this robot.
 
 \begin{figure}[!ht]
     \centering
@@ -288,17 +288,17 @@ The arm is composed by three SCHUNK Powerball ERB modules and one PRL+ 100 modul
     \label{fig:schunk_lwa4p_extended}
 \end{figure}
 
-The LWA4P arm was designed to operate at low power at battery dependant devices, and is capable of lifting a maximum payload of 6kg. Each joint in the Powerball is capable of rotating to $\pm 170^\circ$, at a maximum speed of $72^\circ /\text{s}$, and the overall repeat accuracy of the arm is $\pm 0.15 \ \text{mm}$.
+The LWA4P arm was designed to operate at low power at battery-dependent devices and is capable of lifting a maximum payload of 6kg. Each joint in the Powerball is capable of rotating to $\pm 170^\circ$, at a maximum speed of $72^\circ /\text{s}$, and the overall repeat accuracy of the arm is $\pm 0.15 \ \text{mm}$.
 
 
 \subsection{Head}
 
-The head is linked with torso, allowing both a pan joint and a spherical joint, and contain the human interface to interact with user, including the sound system, microphone, a touch screen display and optional camera for face recognition.
+The head is linked with the torso, allowing for both a pan joint or a spherical joint, and contain the human interface to interact with the user, including the sound system, microphone, a touch screen display and optional camera for face recognition.
 
 
 \subsection{Package organization}
 
-The COB is built around ROS and includes a different sets of packages for different purposes. Since the robot support different configurations (manipulators, joints, mobile bases), some packages are optional. \prettyref{fig:dependency-graph} shows the dependency graph for the first three layers of packages. Notice that the arrangement is quite intricate even showing only the packages written exclusively for COB (not showing other ROS packages used on COB).
+The COB is built around ROS and combines different sets of packages for different purposes. Since the robot support different configurations (manipulators, joints, mobile bases), some packages are optional. \prettyref{fig:dependency-graph} shows the dependency graph for the first three layers of packages. Notice that the arrangement is quite intricate even showing only the packages written exclusively for COB (not showing other ROS packages used on COB).
 
 \begin{figure}[!ht]
 \centering
@@ -313,8 +313,8 @@ The COB core consist of the following packages and its dependencies:
 \begin{itemize}
 \item \texttt{cob\_msgs}: Robot-specific Messages, representing state information like battery status, etc.
 \item \texttt{cob\_srvs}: Robot-specific Services.
-\item \texttt{cob\_description}: Robot URDF models different COB configurations (only base, base with fixed torso, base with actuated torso, etc).
-\item \texttt{cob\_bringup}: machine configuration, including all scripts and dependencies required to run COB.
+\item \texttt{cob\_description}: Robot URDF models for different COB configurations (only base, base with fixed torso, base with actuated torso, etc).
+\item \texttt{cob\_bringup}: machine configuration, including all scripts and dependencies required to run COB, both in simulation and real hardware.
 \end{itemize}
 
 COB also features high-level capabilities, some of them being:
@@ -329,9 +329,9 @@ COB also features high-level capabilities, some of them being:
 
 \subsection{Basic API}
 
-Most of the capabilities of COB are exposed in the form of topics and services, forming an higher level API and sparing the user from interacting with low level sensors and actuators.
+Most of the capabilities of COB are exposed in the form of topics and services, forming a higher level API and sparing the user from interacting with low-level sensors and actuators.
 
-The actuators to move the three wheels base. Since the base kinematics is already calculated by the node, you only need to supply a \texttt{geometry\_msgs/Twist} type message with linear and angular velocities and the drivers will take care of the rest. The topic names can be seen on \prettyref{tab:baseapi}.
+The actuators move the three wheels on the base. Since the base kinematics is already calculated by the node, you only need to supply a \texttt{geometry\_msgs/Twist} type message with linear and angular velocities and the drivers will take care of the rest. The topic names can be seen on \prettyref{tab:baseapi}.
 
 \begin{table}[!ht]
 \caption{Base command API.} \label{tab:baseapi}
@@ -392,10 +392,11 @@ Topic Name & Message Type & Information \\
 \texttt{/base\_laser\_front/scan} & \texttt{sensor\_msgs/LaserScan} & Front laser scan \\ \hline
 \texttt{/base\_laser\_left/scan} & \texttt{sensor\_msgs/LaserScan} & Left laser scan \\ \hline
 \texttt{/base\_laser\_right/scan} & \texttt{sensor\_msgs/LaserScan} & Right laser scan \\ \hline
+\texttt{/scan\_unified} & \texttt{sensor\_msgs/LaserScan} & Unified laser scan \\ \hline
 \end{tabular}
 \end{table}
 
-There are also a cameras in the torso, head and in the sensor ring that collect both raw images and a Point Cloud representation that includes the distance of each point to the focal point of the camera. Their respective topics can be seen on \prettyref{tab:cameraapi}.
+There are also cameras in the torso, head and in the sensor ring that collect both raw images and a Point Cloud representation that includes the distance of each point to the focal point of the camera. Their respective topics can be seen on \prettyref{tab:cameraapi}.
 
 \begin{table}[!ht]
 \caption{Cameras API.} \label{tab:cameraapi}
