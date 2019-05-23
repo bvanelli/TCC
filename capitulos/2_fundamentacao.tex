@@ -2,24 +2,15 @@
 %\vspace{-1.5cm}
 %\noindent\rule{\columnwidth}{1.2mm}
 
-%\begin{figure}[h!]
-%\centering
-%\caption{Regiões sensoriais e seus segmentos medulares}
-%\includegraphics[width=0.91\linewidth]{Imagens/corpo.pdf}
-%\label{fig:corpo}
-%
-%\small Fonte: \citeonline{ASIA}
-%\end{figure}
-
 \section{ROS}
 
-There are many problems when developing robot applications, especially because of the complexity of those systems. ROS is not an operating system per se, but a framework that allows coders to readily develop and test solutions with modularity and code reusability in mind. It was built in an agnostic package system that allows integration from many packages available from the ROS Open-source community, many of them implementing support libraries and proof-of-concept algorithms, as well as core infrastructure.
+There are many problems when developing robot applications, especially because of the complexity of those systems. As more and more functionality is added to the robot, the code base becomes fluttered with intricate dependencies and complicated. ROS is not an operating system per se, but a framework that allows coders to readily develop and test solutions with modularity and code reusability in mind. It was built in an agnostic package system that allows integration from many packages available from the ROS Open-source community, many of them implementing support libraries and proof-of-concept algorithms, as well as core infrastructure.
 
 The main aspects of ROS are \cite{quigley2009ros}:
 
 \begin{itemize}
 \item Peer-to-peer: even though the ROS framework relies on a master or namespace as a lookup mechanism, the communication is established between peers, avoiding unnecessary routing through slow links when the recipient is on the subnet.
-\item Tools-based: instead of building an intricate framework, ROS instead relies on a set of tools written to perform a task, including various tools for compilation, tap data stream, data plotting, configuration, documentation generation, etc.
+\item Tools-based: instead of building an intricate framework, ROS relies on a set of tools written to perform specific tasks, including various tools for compilation, tap data stream, data plotting, configuration, documentation generation, etc. Custom tools can even be written by the user in the form of new packages.
 \item Multi-lingual: since communication between nodes relies only on XML-RPC, they can be implemented in any language, either by explicitly writing the full library that interacts with the ROS Core or building a wrapper for the ROS C++ library.
 \item Thin: many robots implementations have parts of the code that could be reused in another project if they weren't so entangled with all existing code. ROS proposes an architecture where the code is separated into packages that hold no dependency on ROS. All packages can be built individually using CMake, different from the traditional software paradigm where one CMake file builds the entire project.
 \item Free and Open-source: ROS source code is publicly available and released under the BSD License, allowing copy and redistribution of the source code, including for commercial purposes.
@@ -113,9 +104,9 @@ This service is used for setting a boolean variable to \textit{true} or \textit{
 
 \section{Transformations}
 
-Transformations, or tfs, for short, are the way ROS deals with coordinates frames in space. As the poses for each link in the robot change over time, it keeps track of these changes and provides tools to assist the user to do transformations with the data.
+Transformations, or tfs, for short, are the way ROS deals with coordinates frames in space. As the poses for each link in the robot might change over time, it keeps track of these changes and provides tools to assist the user to do transformations with the data.
 
-Suppose the robot has a fixed frame \texttt{/world} as a reference in the origin. Then, the center of the robot is another frame called \texttt{base\_link}. The transformation \texttt{/world -> /base\_link} would indicate the position of the robot in the world.
+Suppose a particular robot has a reference fixed frame \texttt{/world} in the origin. The center of the robot is another frame called \texttt{base\_link}. The transformation \texttt{/world -> /base\_link} would indicate the position of the robot relative to the world.
 
 Now, let's say the robot has a laser scanner sensor \texttt{/laser\_link} relative to \texttt{/base\_link}, as it is fixed on the robot. The laser makes a measurement and this result is relative to the laser position. Let's call the result \texttt{/result}. The result is then related to \texttt{/world} by a long chain of transformations.
 
@@ -127,7 +118,7 @@ It can be tricky to transform the \texttt{/result} back to \texttt{/world} coord
 
 \section{Simulation}
 
-Since deploying a test robot at every code change is not possible, and ROS only provides the tools to develop a robot system solution, there is a need for offline simulation of the robots, avoiding having to test every configuration on physical hardware. In these cases, it can be helpful to set up a rigid body simulation. The normal workflow for setting up a simulation is:
+Since deploying a test robot at every code change is costly and time consuming and ROS only provides the tools to develop a robot system solution, there is a need for offline simulation of the robots, avoiding having to test every configuration on physical hardware. In these cases, it can be helpful to set up a rigid body simulation. The normal workflow for setting up a simulation is \cite{russell2004}:
 
 % http://ode.org/slides/slide2.html
 \begin{itemize}
@@ -138,13 +129,13 @@ Since deploying a test robot at every code change is not possible, and ROS only 
     \item Simulate and benchmark the results against the physical system.
 \end{itemize}
 
-Repeating all these five steps for every physical system will lead to the best results, but can be time-consuming and difficult because all the variables involved. But since the possibilities for a robot system are often limited, physics engines or physics SDKs (source development kits) were developed to aid simulation.
+Repeating all these five steps for every physical system will lead to the best results, but can be time-consuming and difficult because all the variables involved. Since the possibilities for a robot system are often limited, physics engines or physics SDKs (source development kits) were developed to aid simulation.
 
 While the real world has a lot of complexity, rigid body dynamics can be simplified in rigid bodies, joints, collisions, friction and springs, elements that are important to the process. The physical model can be reduced to the laws of motion, using mass, velocity, acceleration, and force as simulation variables. Since the model and the solution to these problems are well known, generalized solvers can be written that compute the simulation at each instant of time, or time steps.
 
 Many simulators implement this generalized solvers, as well as render the 3D models to show to the user, including game engines like Unity and USARSim (based on Unreal engine), commercial solutions like Microsoft Robot Studio, Webots and MATLAB, and open-source projects like Gazebo \cite{craighead2007survey}. Since Gazebo adopts the mentality of the ROS project of being open and free, it became widely used in the community, and as a result better developed over time.
 
-Gazebo provides ROS with a framework to simulate and benchmark the robot or even a group of robots accurately. The \prettyref{fig:gazebo-sim} shows the Gazebo simulation for a supported robot \cite{koenig2004design}.
+Gazebo provides ROS with a framework to simulate and benchmark the robot or even a group of robots accurately. \prettyref{fig:gazebo-sim} shows the Gazebo simulation for a supported robot \cite{koenig2004design}.
 
 \begin{figure}[!ht]
 \centering
@@ -156,17 +147,17 @@ Gazebo provides ROS with a framework to simulate and benchmark the robot or even
 The Gazebo simulator offers:
 
 \begin{itemize}
-\item Dynamics Simulation using multiple physics engines.
-\item Advanced 3D Graphics for high-quality rendering.
-\item Sensors and Noise, to generate reliable sensor data, compatible with real-world sensors.
-\item Robot Models, including ones from the community.
+\item Dynamics simulation using multiple physics engines.
+\item Advanced 3D graphics for high-quality rendering.
+\item Sensors and noise, to generate reliable sensor data, compatible with real-world sensors.
+\item Robot models, including ones from the community.
 \end{itemize}
 
 All the robot description is made using a URDF file or an SDF file. The URDF or Universal Robotic Description Format file is an XML file describing all elements of the robot. Even though it's called ``Universal'', it lacks some of the features like parallel linkages, friction, etc. To get around these issues, a new model called SDF or  Simulation Description Format was developed specifically for use in Gazebo, while the URDF was maintained for backward compatibility. Every time a URDF file is loaded, it is converted by Gazebo to an SDF equivalent.
 
 \subsection{URDF}
 
-The URDF must start describing each link and it's inertia.  \prettyref{fig:gazebo-sim} show three links: \texttt{base\_footprint}, \texttt{wheel\_left\_link} and \texttt{wheel\_right\_link}. They are loaded from STL or Collada files included in the project. \prettyref{fig:gazebo-stl} show the STL renders for the robot shown on \prettyref{fig:gazebo-sim}.
+URDF files starts describing each link of the robot and it's respective inertia. \prettyref{fig:gazebo-sim} show an example of three links of the robot Turtlebot3 Waffle \cite{turtlebot3}: \texttt{base\_footprint}, \texttt{wheel\_left\_link} and \texttt{wheel\_right\_link}. They are loaded from STL or Collada files included in the project. \prettyref{fig:gazebo-stl} show the STL renders for the robot shown on \prettyref{fig:gazebo-sim}.
 
 \begin{figure}[!ht]
 \centering
@@ -175,7 +166,7 @@ The URDF must start describing each link and it's inertia.  \prettyref{fig:gazeb
 \label{fig:gazebo-stl}
 \end{figure}
 
-The inertia is described by its inertial parameters, formerly the mass, center of mass and Moment of Inertia Matrix. Additionally, you specify a collision box that will aid collision testing in simulation. You can then describe the rest of the robot, including the joints that will hold links together. Two basic joints can be seen, \texttt{wheel\_left\_joint} and \texttt{wheel\_right\_joint}, that hold all three links together. Finally, the plugins will give the robot the simulation functionality, adding IMUs, Laser Scanners, Cameras, etc.
+The inertia is described by its inertial parameters, namely the mass, center of mass and moment of inertia matrix. Additionally, collision box that will aid collision testing in simulation can be specified. The user can then describe the rest of the robot, including the joints that will hold links together. Two basic joints can be seen, \texttt{wheel\_left\_joint} and \texttt{wheel\_right\_joint}, that hold all three links together. Finally, the plugins will give the robot the simulation functionality, adding IMUs, Laser Scanners, Cameras, etc.
 
 \subsection{SDF}
 
@@ -190,21 +181,21 @@ The SDF is an improvement of the URDF descriptor format that supports more funct
 
 \subsection{Physics Engines}
 
-In order to simulate the physical conditions of the robot and the environment, Gazebo supports four different physics engines: ODE, Bullet, Simbody, and DART. At the start of each simulation, the user can select the desired physics engine changing the startup flags for the program or configure it on the SDF file.
+In order to simulate the physical conditions of the robot and the environment, Gazebo supports four different physics engines: ODE, Bullet, Simbody, and DART. At the start of each simulation, the user can select the desired physics engine changing the startup flags for the program, or configure it on the SDF file.
 
-ODE or Open Dynamics Engine is an engine for simulating articulated rigid body structures. It features a stable integrator, meaning that numeric errors shouldn't grow out of control. Because of that, the simulator drops physical accuracy in favor of speed, stability and robustness \cite{smith2005open}.
+ODE or Open Dynamics Engine is an engine for simulating articulated rigid body structures. It features a stable integrator, meaning that numeric errors may not grow out of control. Because of that, the simulator drops physical accuracy in favor of speed, stability and robustness \cite{smith2005open}.
 
-Bullet is a Python implementation of physics simulation for robotics, games and visual effect that provides forward and inverse dynamics and kinematics, as well as built-in collision detection. Bullet differentiates itself by being easy to use and provides integration to machine learning frameworks like TensorFlow \cite{coumans2018}.
+Bullet is a Python implementation of physics simulation for robotics, games, and visual effects that provides forward and inverse dynamics and kinematics, as well as built-in collision detection. Bullet differentiates itself by being easy to use and provides integration to machine learning frameworks like TensorFlow \cite{coumans2018}.
 
-Simbody is a multibody simulator focused on biomedical research. It was developed to better suit simulation scenarios where engines like ODE may not converge to correct results because of the lack of fidelity in favor of real-time performance. It is used for neuromuscular, prosthetic, and biomolecular simulation, as well as design and control of humanoid robots \cite{sherman2011simbody}.
+Simbody is a multibody simulator focused on biomedical research. It was developed to better suit simulation scenarios where engines like ODE may not converge to correct results due to its lack of fidelity. It is used for neuromuscular, prosthetic, and biomolecular simulation, as well as design and control of humanoid robots \cite{sherman2011simbody}.
 
-DART or Dynamic Animation and Robotics Toolkit is another rigid body simulation that distinguishes itself by accuracy and stability. The main purpose of this simulator is providing full access to internal kinematic and dynamic quantities so that they can be modified by the user as needed \cite{lee2018dart}.
+DART or Dynamic Animation and Robotics Toolkit is another rigid body simulation that distinguishes itself due to its accuracy and stability. The main purpose of this simulator is to provide full access to internal kinematic and dynamic quantities \cite{lee2018dart}.
 
-All four engines are used to tackle different problems. By varying the time step, for instance, you might obtain better results in your simulation with one of the engines. Usually, when choosing the simulation engine, the relationship between the number of iterations, error, and speed must be taken into account. Some of the simulations require greater precision, while others may require real-time performance. For a more in-depth comparison of the four engines, see \cite{peters2014comparison}.
+All four engines are used to tackle different problems. By varying the time step, for instance, you might obtain better results in your simulation with one of the engines. Usually, when choosing the simulation engine, the relationship between the number of iterations, error, and speed must be taken into account. Some of the simulations require greater precision, while others may require real-time performance. For a more in-depth comparison of the four engines see \cite{peters2014comparison}.
 
 \subsection{Sensors and actuators}
 
-Gazebo also allows sensors and actuators that will interact with the world and send data back to ROS packages. Sensors can include cameras, laser scanners, and actuators that can include drive modules. The sensors are added in the SDF or URDF files. The example below shows the main guidelines to add a camera.
+Gazebo also allows simulating sensors and actuators that will interact with the world and send data back to ROS packages. Sensors can include cameras, laser scanners, contact sensors, IMU, RFID, Sonar, Magnetometer. Actuators can use the ROS control library to actuate joints. The sensors are described in the SDF or URDF files. The example below shows an example of a camera description.
 
 \begin{lstlisting}[caption=Camera Description., language=XML]
   <gazebo reference="camera_link">
@@ -237,7 +228,7 @@ Gazebo also allows sensors and actuators that will interact with the world and s
   </gazebo>
 \end{lstlisting}
 
-Notice that it must include values for image size and update rate on the sensor type. The controller is loaded from a plugin called \texttt{libgazebo\_ros\_camera.so} and uses as parameters which topic the camera will correspond to and the intrinsic parameters of the lenses, as well as the link the camera will be attached to.
+The controller is loaded from a plugin called \texttt{libgazebo\_ros\_camera.so} and uses as parameters which topic the camera will correspond to and the intrinsic parameters of the lenses, update rate and sensor type, as well as the link the camera will be attached to.
 
 There are many pre-built plugins available at Gazebo library, including Cameras (mono and stereo), Kinect, Laser Scanner, Force and IMU sensors, Differential Drive, Skid Steering Drive, as well as templates to write your own dedicated plugin.
 
