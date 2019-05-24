@@ -4,7 +4,7 @@
 
 \section{ROS}
 
-There are many problems when developing robot applications, especially because of the complexity of those systems. As more and more functionality is added to the robot, the code base becomes fluttered with intricate dependencies and complicated. ROS is not an operating system per se, but a framework that allows coders to readily develop and test solutions with modularity and code reusability in mind. It was built in an agnostic package system that allows integration from many packages available from the ROS Open-source community, many of them implementing support libraries and proof-of-concept algorithms, as well as core infrastructure.
+There are many problems when developing robot applications, especially because of the complexity of those systems. As more and more functionality is added to the robot, the code base becomes fluttered with intricate dependencies and entangled libraries. ROS is not an operating system per se, but a framework that allows coders to readily develop and test solutions with modularity and code reusability in mind. It was built in an agnostic package system that allows integration with many packages available from the ROS Open-source community, a lot of them implementing support libraries and proof-of-concept algorithms, as well as core infrastructure.
 
 The main aspects of ROS are \cite{quigley2009ros}:
 
@@ -16,9 +16,11 @@ The main aspects of ROS are \cite{quigley2009ros}:
 \item Free and Open-source: ROS source code is publicly available and released under the BSD License, allowing copy and redistribution of the source code, including for commercial purposes.
 \end{itemize}
 
+The execution of ROS is separated into smaller pieces of code that do particular tasks, called nodes. Each time ROS Core is launched, a collection nodes that are required for execution are spawned: the ROS master, that provides support for the registration of all subsequent nodes, the ROS parameter server, to register parameters during execution time, and rosout, for logging purposes. Once the core is launched, every other node can be spawned.
+
 \subsection{Packages}
 
-In order to better build robotic systems, ROS adopts a packaged architecture, making every subsystem of the application run separately from all the others. Every package can contain new nodes, libraries, configuration or even datasets.
+In order to better build robotic systems, ROS adopts a packaged architecture, making every subsystem of the application separate from all the others. Every package can contain new nodes, libraries, configuration or even datasets.
 
 The main advantage of this approach is making the code more organized in its own subsystems and sub-subsystems, that specialize in doing a specific task very well so that other packages can use this functionality. Packages can also be written independently of language, as long as it's supported by ROS.
 
@@ -30,12 +32,12 @@ In order for nodes to communicate, they interact by publishing messages in topic
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.5\linewidth]{rostopic}
-\caption{Topic initialization.}
+\caption{Topic initialization \cite{rosoverview}.}
 \label{fig:rostopic}
 %\small{Source: ROSWiki.}
 \end{figure}
 
-The topics are implemented in the XML-RPC protocol, using a master node in order to provide name resolution. In order for a publisher to connect to a subscriber, they do the following steps:
+The topics are implemented in the XML-RPC protocol, using a master node in order to provide name resolution. In order for a publisher to connect to a subscriber, they do the following steps \cite{rosoverview}:
 
 \begin{enumerate}
 \item Subscriber register with the master the topics it will be listening to.
