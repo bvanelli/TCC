@@ -1,17 +1,15 @@
 \chapter{SLAM}\label{chp:slam_mapping}
 
-One of the first challenges in indoor navigation for assistive robots is actually finding where they are. Robot localization is fundamental to not only know where you need to go, but rather find a path there that avoids the obstacles.
+One of the first challenges in indoor navigation for assistive robots is actually finding where they are. Robot localization is fundamental to not only know where the robot needs to go, but also find a path to avoid obstacles.
 
-Mapping is an essential tool in this matter, and it comprises the areas of \textit{concurrent mapping} and \textit{localization problem}. In themselves, both problems are relatively easy and well understood: mapping an environment knowing the localization and localizing the robot having the map in hands are simple tasks. However, the combination of those two problems is hard to solve \cite{thrun2000real}.
+Mapping is an essential tool in this matter, and it connects the areas of \textit{concurrent mapping} and \textit{localization problem}. In themselves, both problems are relatively easy and well understood: mapping an environment knowing the localization and localizing the robot having the map in hands are simple tasks. However, the combination of those two problems is hard to solve \cite{thrun2000real}.
 
 Many SLAM (Simultaneous Localization and
-Map Building) algorithms emerged to try and solve these problems, using different approaches and a range of sensors to do the task. Some even evolved fusing data from different sensors to provide higher precision. They often rely on assumptions about the system's nature. Most of the algorithms assume that the noise can be modeled as a Gaussian distribution. Others might assume that the movement is linear and apply Kalman Filters to predict the current state, or even assume the system is linear locally and apply Extended Kalman Filters.
+Map Building) algorithms emerged to try and solve these problems, using different approaches and a range of sensors to do the task. They also combine data from different sensors to provide higher precision. They often rely on assumptions about the system's nature. Some of the algorithms assume that the noise in the sensors can be modeled as a Gaussian distribution and that the movement of the robot is linear and apply Kalman Filters to predict the current state, based on the last state and the odometry data.
 
 \section{Sensors}
 
-\subsection{Laser Scanners}
-
-The laser scanner is one of the most simple ways to capture data about the environment. They work by sending beams of light in a direction and measuring the time it takes for the light to travel back and forth between the object and the sensor. As you want the information to be gathered on more than a single point, the scanner can rotate a mirror or even the whole sensor to gather measurements from all directions, as shown on \prettyref{fig:sick_s300_diagram}. There are two main ways of measuring the object distance: time of flight and Phase-Shift \cite{amann2001laser}.
+The laser scanner is the most popular way to capture data about the environment. They work by sending beams of light in a direction and measuring the time it takes for the light to travel back and forth between the object and the sensor, either directly, by measuring time of flight, or indirectly, by measuring the phase-shift \cite{amann2001laser}. As you want the information to be gathered on more than a single point, the scanner can rotate a mirror or even the whole sensor to gather measurements from all directions, as shown on \prettyref{fig:sick_s300_diagram}. The LIDARs that do not contain moving parts are called solid state LIDAR.
 
 \begin{figure}
      \centering
@@ -21,13 +19,17 @@ The laser scanner is one of the most simple ways to capture data about the envir
      \label{fig:sick_s300}
 \end{figure}
 
-In the time of flight measurement, a stopwatch is started when the beam of light is emitted. Since the speed of light is well known, the calculations are very straight forward, as shown on \prettyref{eq:d}. This form of measurement depends heavily on the quality of construction, as the usual sources of inaccuracy are noise (electronics, radiation in the room), timing (stopwatch precision, pulse detection), and minimal changes in each measurement can lead to significant errors in the final result. Averaging and Filtering also take a big role in providing reliable data.
+In the time of flight measurement, a stopwatch is started when the beam of light is emitted and stopped when it hits the sensor, giving a measurement of time $t$. Since the speed of light $c$ is well known, the calculations are very straight forward, as shown on \prettyref{eq:d}. This form of measurement depends heavily on the quality of construction, as noise (electronics, radiation in the room) and timing (stopwatch precision, pulse detection) can lead to significant errors in the final result, and averaging and filtering help gather more reliable data \cite{siegwart2011introduction}.
 
 \begin{equation} \label{eq:d}
 D = \frac{c \cdot t}{2}
 \end{equation}
 
-The second way of calculating the distance is by using phase-shift techniques, assuming there will be a difference in phase between the beam of light emitted and received. This varies according to the frequency and time traveled according to the equation $\phi = \omega \cdot t$, where $\phi$ is the phase-shift, $t$ the time traveled and $\omega$ the angular frequency of the wave. Isolating $t$ and substituting in \prettyref{eq:d}, we can derive the \prettyref{eq:d2} that dictates the distance based on frequency. This technique also requires more complex signal processing structures like a heterodyne for good for measurements.
+The second way of calculating the distance is by using phase-shift techniques, assuming there will be a difference in phase between the beam of light emitted and received. This varies according to the frequency and time traveled according to the \prettyref{eq:omegat}, where $\phi$ is the phase-shift, $t$ the time traveled and $\omega$ the angular frequency of the wave. Isolating $t$ and substituting in \prettyref{eq:d}, we can derive the \prettyref{eq:d2} that dictates the distance based on frequency. This technique also requires more complex signal processing structures like a heterodyne for good measurements \cite{siegwart2011introduction}.
+
+\begin{equation} \label{eq:omegat}
+\phi = \omega \cdot t
+\end{equation}
 
 \begin{equation} \label{eq:d2}
 D = \frac{1}{2} \frac{c \cdot \phi}{\omega} = \frac{1}{4 \pi} \frac{c \cdot \phi}{f}
@@ -50,7 +52,7 @@ Wheel odometry is one of the most simple ways to determine the position of the r
     \label{fig:fk}
 \end{figure}
 
-Considering the robot from \prettyref{fig:fk}, the position according to the global coordinate system can be represented by $\xi_I = [x, y, \theta]$, as well as the velocity $\dot{\xi} = [\dot{x}, \dot{y}, \dot{\theta}]$. The velocity model for the robot coordinate system can be written as:
+Considering the robot from \prettyref{fig:fk}, the position according to the global coordinate system can be represented by $\xi_I = [x, y, \theta]$ and the velocity $\dot{\xi} = [\dot{x}, \dot{y}, \dot{\theta}]$. The velocity model for the robot coordinate system can be written as \cite{thrun2005probabilistic}:
 
 \begin{equation}
 \dot{\xi_R} = 
@@ -69,7 +71,7 @@ Considering the robot from \prettyref{fig:fk}, the position according to the glo
 R(\theta) \cdot \dot{\xi_I}
 \end{equation}
 
-It is easy to calculate the inverse problem using the inverse matrix $R^-1(\theta)$, converting back from the robot coordinate frame to the global frame. The only missing parameter is how the wheel kinematics translates to the $\dot{\xi_R}$ robot velocity, and that will depend on the robot wheel arrangement (wheel type, number of wheels, radius) and the robot dimensions.
+It is easy to calculate the inverse problem using the inverse matrix $R^{-1}(\theta)$, converting back from the robot coordinate frame to the global frame. The only missing parameter is how the wheel kinematics translates to the $\dot{\xi_R}$ robot velocity, and that will depend on the robot wheel arrangement (wheel type, number of wheels, radius) and the robot dimensions.
 
 The main disadvantages of wheel odometry are that the robot is limited to flat terrain, and even then slippery and small changes to forward kinematics (i.e. the radius of the wheel changes slightly) can accumulate error over time, as there is not a suitable way to correct the error without other sources of information.
 
@@ -77,7 +79,7 @@ The main disadvantages of wheel odometry are that the robot is limited to flat t
 
 Laser odometry bases itself on Laser Scanner data to localize the robot. Instead of using odometry to watch how the robot moves in the environment, it uses the collected data to see how the environment moves in relation to the robot.
 
-One approach to this calculation would be taking two consecutive laser scanners and comparing them. It is assumed that the environment is mostly static so not much should change from one set of data to the other. The transformation that minimizes the distance between points from the two sets is then considered to be the movement of the robot in that time slot.
+One approach to this calculation would be taking two consecutive laser scanners and comparing them. It is assumed that the environment is mostly static so not much should change from one set of data to the other. The transformation that minimizes the distance between points from the two sets is then considered to be the movement of the robot in that time slot \cite{Jaimez_et_al_ICRA2016}.
 
 As the small movements are integrated over time, this approach has the same flaws as wheel odometry, with error accumulating over time. However, the robot can improve accuracy by keeping a laser scanner measurement history and repeating the minimization between many poses. It can also take advantage if it revisits a point in the past where the measurement was more accurate, as it can use data from that measurement for comparison.
 
@@ -95,13 +97,13 @@ The map can also be represented by a variable $M$ as follows. Notice also that t
     M = \{m_0, m_1, \dots, m_{n - 1}\}
 \end{equation}
 
-In order to evaluate both variables $X_t$ and $M$, it is necessary to have some idea on how the robot is interacting with the world, how it is moving or the sensors readings. This can be for instance the measurements of robot odometry (wheel or laser odometry) or IMU data. The set of these measurements is defined as:
+In order to evaluate both variables $X_t$ and $M$, it is necessary to have some idea on how the robot is interacting with the world. This can be for instance the measurements of robot odometry (wheel or laser odometry) or IMU data. The set of these measurements is defined as:
 
 \begin{equation}
     U_t = \{u_0, u_1, \dots, u_t\}
 \end{equation}
 
-To also build the map, the robot will need the set of observations of the world, that can come as measurements from 3D cameras, LIDAR, SONAR, etc. This set of measurements is defined as:
+To also build the map, the robot will need the set of observations of the world, that can come as measurements from 3D cameras, LIDAR, sonar, etc. This set of measurements is defined as:
 
 \begin{equation}
     Z_t = \{z_0, z_1, \dots z_t\}
@@ -130,7 +132,7 @@ The Occupancy Grid is a form of representing obstacles in 2D or 3D where each ce
 
 According to \prettyref{fig:grid_steps}, the first step when building a sensor grid is to get the sensor reading. The next step is build a sensor model $p(r|z)$. Then, the Bayesian estimation is applied, based on all the observations before and current observations, to update the map. Finally, the world model is obtained using an estimator such as \textit{maximum a posteriori} (MAP). All those steps are done by the SLAM algorithms using different techniques. Even with default tuning, those algorithms are good enough to work on most scenarios.
 
-Naturally, the obstacle cell is labeled as occupied, with probability 1. All the cells until this one are labeled as empty, with probability 0. The unknown cells are labeled unknown, with probability 0.5.
+Naturally, the obstacle cell is labeled as occupied, with probability 1. All the cells until this one are labeled as empty, with probability 0. The unknown cells are labeled unknown, with probability 0.5. \prettyref{fig:occupancy_grid} show the graphical representation of this process.
 
 \begin{figure}[!ht]
     \centering
@@ -139,7 +141,7 @@ Naturally, the obstacle cell is labeled as occupied, with probability 1. All the
     \label{fig:occupancy_grid}
 \end{figure}
 
-The process is iterative and, as measurements from different points of view and different sensors grow, the maps become more and more complete, as shown on \prettyref{fig:occupancy_grid_algorithm}. The data fusion between sensors can also be done in different manners but is commonly done using Kalman filters or Extended Kalman filters.
+The process is iterative and, as measurements from different points of view and different sensors grow, the maps become more and more complete, as shown on \prettyref{fig:occupancy_grid_algorithm}. Data fusion between sensors can also be done to build a more accurate global map.
 
 \begin{figure}[!ht]
     \centering
@@ -152,19 +154,19 @@ The process is iterative and, as measurements from different points of view and 
 
 \subsection{Gmapping}
 
-Gmapping is by far the most famous SLAM algorithm in robotics for a number of reasons. It was originally proposed by \citeauthor{doucet2000rao} in 2000 as a way of combining Particle filters algorithms with Rao-Blackwellized techniques. The main advantage of their approach is dealing with non-gaussian distributions that Kalman filters cannot deal with without rough linearization, as well as being less complex to implement.
+Gmapping is by far the most famous SLAM algorithm in robotics for a number of reasons. It was originally proposed by \citeauthor{doucet2000rao} in 2000 as a way of combining particle filter algorithms with Rao-Blackwellized techniques. The main advantage of their approach is dealing with non-gaussian distributions that Kalman filters cannot deal with without rough linearization, as well as being less complex to implement.
 
-\citeauthor{grisetti2007improved} in 2007 proposed improvements to \citeauthor{doucet2000rao} techniques in order to reduce complexity and make the resampling step better. It works by first reducing the number of particles needed to be stored combining the current observation and odometry information, contrary to previous approaches where only odometry was used, reducing the estimation error and getting a more refined map. The second technique is using an adaptative resampling technique, meaning that resampling only has to be done when needed, reducing the problem with particle depletion, when only a few particles are in high-probability areas and a lot of particles represent pretty old and unreliable information.
+In \cite{grisetti2007improved}, Grisetti proposed improvements to \citeauthor{doucet2000rao} techniques in order to reduce complexity and make the resampling step better. It works by first reducing the number of particles needed to be stored combining the current laser scan observation and odometry information, contrary to previous approaches where only odometry was used, reducing the estimation error and getting a more refined map. The second technique is using adaptative resampling, meaning that resampling only has to be done when needed, reducing the problem with particle depletion, when only a few particles are in high-probability areas and a lot of particles represent pretty old and unreliable information.
 
 \subsection{Hector}
 
-Hector SLAM first emerged in 2013 to solve the very specific problem of mapping in uneven terrains. It was aimed to be used in rescue robots that have to be robust enough to drive through ramps and obstacles and still be able to estimate the trajectory and map without reliable odometry information. Instead of trying to filter data to only include useful data, Hector pose estimation completely drops odometry data in favor of laser scanner data. It instead uses a fast LIDAR data scan-matching to estimate odometry. In order to estimate 6DOF when moving in uneven terrain, the algorithm will also need an IMU device, and optional localization devices like GPS, barometers, and accelerometers. All the data is then fused using an Extended Kalman Filter (EKF), and not including odometry information is a simple way to exclude all errors caused by wheel spin, drift or slippery ground \cite{kohlbrecher2011flexible}.
+Hector SLAM first emerged in 2013 to solve the very specific problem of mapping in uneven terrains. It was aimed to be used in rescue robots that have to be robust enough to drive through ramps and obstacles and still be able to estimate the trajectory and map without reliable odometry information. Instead of trying to filter data to only include useful data, Hector pose estimation completely drops odometry data in favor of laser scanner data. It instead uses a fast LIDAR data scan-matching to estimate odometry. In order to estimate 6DOF when moving in uneven terrain, the algorithm also needs an IMU device, and optional localization devices like GPS, barometers, and accelerometers. All the data is then fused using an Extended Kalman Filter (EKF), and not including odometry information is a simple way to exclude all errors caused by wheel spin, drift or slippery ground \cite{kohlbrecher2011flexible}.
 
 \subsection{Karto}
 
 Karto is a graph-based SLAM algorithm developed by Karto Robotics and made open-source in 2010. Graph-based SLAM, proposed initially by \citeauthor{lu1997globally}, works by organizing the robot pose information into a graph and then optimizing it to make it more consistent and minimize an error function. While the construction of the graph is heavily sensor dependent, optimizing the graph is computationally expensive and the reason why Graph-based SLAM took so long to become popular \cite{grisetti2010tutorial}.
 
-The graph is constructed representing every pose for the robot as a node in the graph. Every robot movement is then represented as an edge in the graph that connects the poses, this data in the edge usually being the odometry information. If the robot comes back to a known position, the algorithm does the loop closure and connects the graph to a previously known node. Since the odometry is not reliable, it has to be corrected using the laser scanner measurements. The scan observation in both poses is then matched to calculate the virtual transformation that should map one measurement optimally to the other. Let $z_{i,j}$ be the odometry information between poses $i$ and $j$ and $\hat{z_{i,j}}$ be the expected measurement, the error can be calculated simply subtracting one from the other.
+The graph is constructed representing every pose for the robot as a node in the graph. Every robot movement is then represented as an edge in the graph that connects the poses, this data in the edge usually being the odometry information. If the robot comes back to a known position, the algorithm does the loop closure and connects the graph to a previously known node. Since odometry is not reliable, it is corrected using the laser scanner measurements. The scan observation in both poses is then matched to calculate the virtual transformation that should map one measurement optimally to the other. Let $z_{i,j}$ be the odometry information between poses $i$ and $j$ and $\hat{z_{i,j}}$ be the expected measurement, the error $e_{i,j}$ can be calculated simply subtracting one from the other.
 
 \begin{equation}
     e_{i,j}(x_i, x_j) = z_{i,j} - \hat{z_{i,j}}
@@ -176,7 +178,7 @@ The goal is to ultimately build a function $F(x)$ using the log-likelihood strat
     F(x) = \sum_{\langle i, j \rangle \ \in \ \mathcal{C}} e_{i,j}^T \Omega_{i,j} e_{i,j}
 \end{equation}
 
-so that it can be minimized by the optimization algorithm for $x^*$. In order words, we are asking what is the optimal path that minimizes the observed error, given the distribution $\Omega$ and the measurements $z$ and $\hat{z}$.
+so that it can be minimized by the optimization algorithm for $x^*$. In order words, the questions is what is the optimal path that minimizes the observed error, given the distribution $\Omega$ and the measurements $z$ and $\hat{z}$.
 
 \begin{equation}
     x^* = \text{argmin}_x \ F(x)
@@ -186,25 +188,25 @@ The optimization is the main problem when dealing with graph-based SLAM, and man
 
 \subsection{Cartographer}
 
-Cartographer is a fairly recent SLAM technique developed by Google. The concept behind the algorithm can be seen on \prettyref{fig:cartographer}. The main idea is separating the matters into two different problems: local SLAM and Global SLAM. The main objective is not having to deal with big maps or representations while mapping a new area. Instead, a submap is created for the local area and updated every new scan. Every scan is also tested against the submap using a Ceres-based scan matcher, to do pose optimization.
+Cartographer is a fairly recent SLAM technique developed by Google. The concept behind the algorithm can be seen on \prettyref{fig:cartographer}. The main idea is separating SLAM into two different problems: local SLAM and Global SLAM. The main objective is not having to deal with big maps or representations while mapping a new area. Instead, a submap is created for the local area and updated every new scan. Every scan is also tested against the submap using a Ceres-based scan matcher, to do pose optimization.
 
-The idea of having submaps is that it is only build using a few scans, meaning that the estimate should be very close to reality. As the submaps grow larger, so does the error, meaning that every few scans a new submap is started. The Global SLAM thread will then have a collection of submaps to compute the whole map running loop closure \cite{cartographer2016google}.
+The idea of having submaps is that it is only built using a few scans, meaning that the estimate should be very close to reality. As the submaps grow larger, so does the error, meaning that at every few scans a new submap is started. The Global SLAM thread will then have a collection of submaps to compute the whole map running loop closure \cite{cartographer2016google}.
 
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.6\linewidth]{cartographer}
-    \caption{High-level System overview of Cartographer.}
+    \caption{High-level System overview of Cartographer \cite{cartographerimage}.}
     \label{fig:cartographer}
 \end{figure}
 
-\section{Evaluating SLAM Performance}
+\section{Evaluating SLAM Performance} \label{sec:evaluating}
 
 There is a lot of debate on how to evaluate SLAM performance. Since there are plenty of algorithms using different techniques, each one of them having their own set of parameters, there is a need to evaluate them and tell which one does better in each scenario. A lot of this evaluation is done visually, assisted by a human that tells whether the occupancy grid is adequate considering the building floor plans. But as SLAM algorithms get more precise, it is difficult to draw conclusions just from the appearance itself. Plus, there is the problem of not having the floor plants for publicly available datasets, making it harder to compare between methods \cite{kummerle2009measuring}.
 
 According to \citeauthor{amigoni2007good}, the following issues have to be addressed when comparing SLAM:
 
 \begin{itemize}
-    \item The dataset must be publicly available, examples being MIT Killian Court or the Intel Research Lab dataset.
+    \item The dataset must be publicly available, examples being MIT Killian Court or the Intel Research Lab dataset \cite{kummerle2009measuring}.
     \item All algorithm parameters have to be indicated.
     \item The behavior for the algorithm has to be tested with different parameters in order to evaluate robustness.
     \item The dataset must include a closed-loop test, where the robot runs around an environment and comes back to the same place, to test against algorithm divergence.
@@ -212,10 +214,10 @@ According to \citeauthor{amigoni2007good}, the following issues have to be addre
     \item Bad mapping results must be shown.
 \end{itemize}
 
-The most natural way of analyzing the poses is the squared error from the pose estimates against the ground truth. By calculating the distance from one to another and adding over time, we can get a good metric for the pose error. Considering the $x_i$ as the pose calculated by the SLAM and $x_i^*$ the ground truth pose, we can derive the \prettyref{eq:error_squared} for the squared error.
+The most natural way of analyzing the poses is the squared error from the pose estimates against the ground truth. By calculating the distance from one to another and adding over time, we can get a good metric for the pose error. Considering the $x_i$ as the pose calculated by the SLAM and $x_i^*$ the ground truth pose and $N$ the total number of poses, we can derive the \prettyref{eq:error_squared} for the squared error.
 
 \begin{equation}\label{eq:error_squared}
-\epsilon(x) = \frac{1}{N} \sum_{i}^N (x_i - x_i^*)^2
+\epsilon(x) = \frac{1}{N} \sum_{i = 1}^N (x_i - x_i^*)^2
 \end{equation}
 
 \citeauthor{kummerle2009measuring} proposes a framework to analyze mapping accuracy that uses visual inspection in order to estimate the relations between the robot poses and the environment. The estimation is then compared to the SLAM results and the final metric is the "deformation energy" required to transform the mapped result into ground truth. In other words, each of the $N_c$ displacements $\delta_{i,j}$ is compared against the ground truth $\delta_{i,j}^*$ using the \prettyref{eq:displacement}, for a set of  $(i,j)$ pairs.
@@ -224,9 +226,9 @@ The most natural way of analyzing the poses is the squared error from the pose e
     \epsilon(\delta) = \frac{1}{N_c} \sum_{i, j} trans(\delta_{i,j} \ominus \delta_{i,j}^*)^2 + rot(\delta_{i,j} \ominus \delta_{i,j}^*)^2
 \end{equation}
 
- The displacement $\delta_{i, j}$ is simply calculated by the transformation between a local measurement between two known poses, from pose $x_i$ to pose $x_j$, using a distance function like the Euclidian Distance. Evaluating the displacement instead of the global position is great because it makes the evaluation resilient to small errors at the start of mapping that would impact every subsequent global position, even when the mapping in the next steps is done correctly. Since the ground-truth displacement is not available, this implementation relies on the fact that the relation between two poses can be calculated using the laser scanner, each pose later evaluated by a human. It also relies on a good enough initial guess, also human assisted. The authors also assume just evaluating the poses without evaluating the resulting map is enough for SLAM benchmarking. While this holds true for most cases, it is still very hard to infer global performance, as global displacements (large enough distance between $i$ and $j$) also carry the problem of accumulating human error, as each measurement is supervised.
+ The displacement $\delta_{i, j}$ is simply calculated by the transformation from a local measurement between two known poses, from pose $x_i$ to pose $x_j$, using a distance function like the Euclidian Distance. Evaluating the displacement instead of the global position is great because it makes the evaluation resilient to small errors at the start of mapping that would impact every subsequent global position, even when the mapping in the next steps is done correctly. Since the ground-truth displacement is not available, this implementation relies on the fact that the relation between two poses can be calculated using the laser scanner, each pose later evaluated by a human. It also relies on a good enough initial guess, also human assisted. The authors also assume just evaluating the poses without evaluating the resulting map is enough for SLAM benchmarking. While this holds true for most cases, it is still very hard to infer global performance, as global displacements (large enough distance between $i$ and $j$) also carry the problem of accumulating human error, as each measurement is supervised.
  
- \citeauthor{santos2013evaluation} propose a more in-depth comparison with the publicly available SLAM algorithms that run on ROS. The authors ran both noise-free simulation and real-life experiments with the scenarios and analyzed the error metric between the ground-truth map and the generated map, also evaluating the CPU usage for each algorithm. The authors, however, didn't provide extensive information on how the maps were aligned, very crucial since the fit has to be optimal in order to do an adequate comparison.
+ \citeauthor{santos2013evaluation} propose a more in-depth comparison with the publicly available SLAM algorithms that run on ROS. The authors ran both noise-free simulation and real-life experiments with the scenarios and analyzed. The maps collected were binarized and aligned and error metric was defined as the normalized sum of distances from all pixels in the resulting map to its nearest neighbour in the ground-truth map. The error metrics were analyzed, also evaluating the CPU usage for each algorithm. The authors, however, didn't provide extensive information on how the maps were aligned, very crucial since the fit has to be optimal in order to do an adequate comparison.
  
  \section{Proposed Evaluation techniques}
  
@@ -235,11 +237,11 @@ The most natural way of analyzing the poses is the squared error from the pose e
  \begin{itemize}
      \item Algorithms available in ROS will be used, to ensure every algorithm is publicly available for testing.
      \item Different maps will be tested to ensure no algorithm is favored. In each run, each algorithm will receive the same working data in the form as ROS bags.
-     \item The scenario will be simulated in a map carefully generated using a public tool, to make sure everyone can generate the same testing data. Even though there are differences between simulation and reality, it is the only way to acquire real ground-truth data for the environment.
+     \item The scenario will be simulated in a map carefully generated using a public tool, to make sure everyone can generate the same testing data.
      \item Maps will test the ability for the algorithm to do accurate mapping, accurate localization, and loop-closure. Different metrics will be used to ensure all these three aspects of each map are analyzed.
  \end{itemize}
  
-The articles discussed already give us a good indication of what to aim for in a comparison algorithm. The first comparison method chosen is the one described in \cite{kummerle2009measuring}, as it best describes local error in the form of displacements when analyzing the trajectory of the robot. Since the ground-truth data is now available and doesn't have to be inferred by a human operator, the process can be done autonomously and we can ensure the data perfectly matches the environment. For comparison, we are also going to include the squared error metrics proposed in \prettyref{eq:error_squared}.
+The manuscripts discussed in \prettyref{sec:evaluating} already give us a good indication of what to aim for in a comparison algorithm. The first metric chosen is the one described in \cite{kummerle2009measuring}, as it best describes local error in the form of displacements when analyzing the trajectory of the robot. Since the ground-truth data is now available and doesn't have to be inferred by a human operator, the process can be done autonomously and we can ensure the data perfectly matches the environment. For comparison, we are also going to include the squared error metrics proposed in \prettyref{eq:error_squared}.
 
 The second comparison method chosen is the one demonstrated in \cite{santos2013evaluation}, only that now the approach for lining up the maps and calculating the error metric will be fully described. This approach will help to analyze the quality of the generated map regarding the placement of walls and objects, including their orientation and the amount of noise.
 
@@ -249,7 +251,7 @@ The third metric will focus on analyzing the modeled empty space of each algorit
 
 It is very important to build accurate maps for SLAM testing, as the resulting map has to be compared against the ground truth and any inaccuracies might lead to different results. For that, a map generation script has been written to generate accurate Gazebo SDF descriptions of the desired map.
 
-To generate a map, we begin with the model we want for the map to be generated with a small image file. As an example, \prettyref{fig:map_generation} is 200x200 pixels. We then draw black pixels that will represent the walls in the generated map. We run the script to generate the map and the simulated result will be something like \prettyref{fig:gazebo_generation}.
+To generate a map, we begin with the model we want for the map to be generated with a small image file. As an example, \prettyref{fig:map_generation} is 200x200 pixels. We then draw black pixels that will represent the walls in the generated map. After running the script to generate the map, the resulting map can be seen on \prettyref{fig:gazebo_generation}.
 
 \begin{figure}[!ht]
      \centering
@@ -306,272 +308,24 @@ Each wall can be represented by the XML shown in Listing~\ref{lst:sdf_body}. Eac
         </link>
 \end{lstlisting}
 
-\section{Selecting maps}\label{sec:selecting_maps}
+\section{Experimental maps}\label{sec:selecting_maps}
 
 The maps have to be selected to include the scenarios encountered in real life. We selected three maps shown in \prettyref{fig:generated_maps}.
 
-The first map can be seen on \figurename~\ref{subfig:test3}. It is meant to test the loop closure capabilities of each algorithm since the robot will have to do the full circle, come back to the same point, and then connect the two pathways.
-
-The second map seen on \figurename~\ref{subfig:test2}. It is a more complex version of the first map. It will test the capability of the algorithm to maintain scale between different rooms, as the corridor on the left and the loop on the right are separated by walls.
-
-The third map, shown on \figurename~\ref{subfig:test3}, will test how the localization performs without revisiting positions, as the robot goes to the center of the loop without previous information and then comes back.
-
 \begin{figure}[!ht]
      \centering
-     \subfloat[][]{\includegraphics[width=.3\linewidth]{test1}\label{subfig:test1}}
-     \subfloat[][]{\includegraphics[width=.3\linewidth]{test2}\label{subfig:test2}}
-     \subfloat[][]{\includegraphics[width=.3\linewidth]{test3}\label{subfig:test3}}
+     \subfloat[][]{\includegraphics[width=.3\linewidth]{test1_coordinates}\label{subfig:test1}}
+     \subfloat[][]{\includegraphics[width=.3\linewidth]{test2_coordinates}\label{subfig:test2}}
+     \subfloat[][]{\includegraphics[width=.3\linewidth]{test3_coordinates}\label{subfig:test3}}
      \caption{Selected maps for testing.}
      \label{fig:generated_maps}
 \end{figure}
 
-\section{Setting up the SLAM Algorithms}\label{sec:slam}
+The first map can be seen on \figurename~\ref{subfig:test1}. It is meant to test the loop closure capabilities of each algorithm since the robot will have to do the full circle, come back to the same point, and then connect the two pathways. The robot starts at the A position, goes into a straight line into B, then into a straight line into C. It then spins once around itself, goes to D and finally comes back to A.
 
-The following configuration was used for each of the tested algorithms. If not specified, the default configuration is being used. Cartographer is the only algorithm that also requires an external Lua file for configuration. All algorithms require the same hardware setup: a source of odometry, in this case a transformation from the robot fixed frame \texttt{odom\_combined} to \texttt{base\_link} and the laser scanner data, represented by the topic \texttt{scan\_unified}, that combines the data from all three lasers scanners on the robot base.
+The second map seen on \figurename~\ref{subfig:test2}. It is a more complex version of the first map. It will test the capability of the algorithm to maintain scale between different rooms, as the corridor on the left and the loop on the right are separated by walls. The robots starts at A and follows the sequence ABCDEFG. It then returns to the home position through D, totalling ABCDEFGDCBA.
 
-Every algorithm cycle then publishes the calculated map into the \texttt{/map} topic and a correction of odometry using a transformation from \texttt{map} to \texttt{odom\_combined}. This transformation is a small displacement between the two frames to account for errors in the odometry for the robot that accumulates over time and can be reduced by taking the pose corrected by SLAM.
-
-\subsection{Gmapping}
-
-To start Gmapping, we call the launch file shown in Listing~\ref{lst:gmapping}. It starts the node \texttt{slam\_gmapping} from package \texttt{gmapping}. The laser scan topic is remapped to match the robot topic name with the \texttt{remap} tag and the odometry frame is provided as \texttt{odom\_combined}. The \texttt{map\_update\_interval} and number of particles are kept in the default configuration. The \texttt{xmin}, \texttt{xmax}, \texttt{ymin} and \texttt{ymax} are the initial size of the resulting map in meters and won't impact the results, as they are automatically increased if the map needs to be bigger. The \texttt{delta} is the map resolution and is kept at the default value of 0.05 pixels/meter.
-
-\begin{lstlisting}[caption={Gmapping launch file.},label={lst:gmapping},language=XML]
-<launch>
-  <node pkg="gmapping" type="slam_gmapping" name="slam_mapping" output="screen">
-    <remap from="scan" to="scan_unified"/>
-    <param name="odom_frame" type="string" value="odom_combined"/>
-    <param name="map_update_interval" value="5.0"/>
-    <param name="particles" value="30"/>
-    <param name="xmin" value="-8"/>
-    <param name="ymin" value="-8"/>
-    <param name="xmax" value="8"/>
-    <param name="ymax" value="8"/>
-    <param name="delta" value="0.05"/> <!-- map_resolution -->
-  </node>
-</launch>
-\end{lstlisting}
-
-\subsection{Hector}
-
-The Hector mapping node is started using the launch script in Listing~\ref{lst:hector}, starting the node \texttt{hector\_mapping} from package \texttt{hector\_mapping}. We first remap the laser scan to the right topic and use the adequate frame names for the map, base link and odometry link. The \texttt{pub\_map\_odom\_transform} is set to True to publish the transform from \texttt{map} to \texttt{odom\_combined}. The \texttt{laser\_min\_dist} is set to the minimum value registered for the COB laser scanners.
-
-\begin{lstlisting}[caption={Hector launch file.},label={lst:hector},language=XML]
-<launch>
-  <node pkg="hector_mapping" type="hector_mapping" name="slam_mapping"    output="screen">
-    <remap from="scan" to="scan_unified"/>
-    <param name="map_frame" value="map" />
-    <param name="base_frame" value="base_link" />
-    <param name="odom_frame" value="odom_combined" />
-    <param name="pub_map_odom_transform" value="true"/>
-    <param name="laser_min_dist" value="0.05">
-  </node>
-</launch>
-\end{lstlisting}
-
-\subsection{Karto}
-
-The Karto mapping node is started using the launch script in Listing~\ref{lst:karto}, starting the node \texttt{slam\_karto} from package \texttt{slam\_karto}. We only have to set the the scan and odometry frames. The \texttt{map\_update\_interval} and \texttt{resolution} are set to the same values as Gmapping.
-
-\begin{lstlisting}[caption={Karto launch file.},label={lst:karto},language=XML]
-<launch>
-  <node pkg="slam_karto" type="slam_karto" name="slam_mapping" output="screen">
-    <remap from="scan" to="scan_unified"/>
-    <param name="odom_frame" value="odom_combined"/>
-    <param name="map_update_interval" value="5"/>
-    <param name="resolution" value="0.05"/>
-  </node>
-</launch>
-\end{lstlisting}
-
-\subsection{Cartographer}
-
-The Cartographer node requires a lot of configuration compared to the other SLAM algorithms. Two separate nodes have to be called at start, as seen in Listing~\ref{lst:cartographer}: the \texttt{cartographer\_node} and \texttt{cartographer\_occupancy\_grid\_node}, both from package \texttt{cartographer\_ros}.
-
-The main Cartographer node does all the sub-map generation and takes as parameters a Lua file with the algorithm configuration, shown in Listing~\ref{lst:cartographer_lua}. The configuration file uses all the default parameters available in Cartographer example files (in file \texttt{backpack\_2d.lua}), with the exception that the IMU was disabled, as COB doesn't have one. The frames were set accordingly and the option \texttt{provide\_odom\_frame} was set to true to get the map to odometry transform during execution. The laser scan was changed from multi-echo laser scan to laser scan.
-
-The second node is the occupancy grid node, that reads data from the sub-map list and republishes into the \texttt{/map} topic as a standard Occupancy Grid message from ROS. The resolution is also set to 0.05 pixels/meter.
-
-\begin{lstlisting}[caption={Cartographer launch file.},label={lst:cartographer},language=XML]
-<launch>
-  <!-- Arguments -->
-  <arg name="configuration_basename" default="cartographer.lua"/>
-
-  <!-- cartographer_node -->
-  <node pkg="cartographer_ros" type="cartographer_node" name="slam_mapping"
-        args="-configuration_directory $(find cob_bringup_sim)/launch
-              -configuration_basename $(arg configuration_basename)"
-        output="screen">
-    <remap from="scan" to="scan_unified" />
-  </node>
-
-  <!-- cartographer_occupancy_grid_node -->
-  <node pkg="cartographer_ros" type="cartographer_occupancy_grid_node"
-        name="cartographer_occupancy_grid_node"
-        args="-resolution 0.05" />
-</launch>
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Cartographer Lua configuration.},label={lst:cartographer_lua},language=Python]
-include "map_builder.lua"
-include "trajectory_builder.lua"
-
-options = {
-  map_builder = MAP_BUILDER,
-  trajectory_builder = TRAJECTORY_BUILDER,
-  map_frame = "map",
-  tracking_frame = "base_link",
-  published_frame = "base_link",
-  odom_frame = "odom_combined",
-  provide_odom_frame = true,
-  use_odometry = false,
-  num_laser_scans = 1,
-  num_multi_echo_laser_scans = 0,
-  num_subdivisions_per_laser_scan = 10,
-  num_point_clouds = 0,
-  lookup_transform_timeout_sec = 0.2,
-  submap_publish_period_sec = 0.3,
-  pose_publish_period_sec = 5e-3,
-  trajectory_publish_period_sec = 30e-3,
-  rangefinder_sampling_ratio = 1.,
-  odometry_sampling_ratio = 1.,
-  imu_sampling_ratio = 1.,
-}
-
-MAP_BUILDER.use_trajectory_builder_2d = true
-TRAJECTORY_BUILDER_2D.num_accumulated_range_data = 10
-TRAJECTORY_BUILDER_2D.use_imu_data = false
-
-return options
-\end{lstlisting}
-
-\section{Collecting data} \label{sec:collecting_data}
-
-For data collection, we first start the robot using the command line. We are using \texttt{cob4-9} to avoid having to load unnecessary parts of the robot like the arms or the cameras.
-
-\begin{verbatim}
-roslaunch cob_bringup_sim robot.launch robot:=cob4-9 robot_env:=test1
-\end{verbatim}
-
-We then launch the controller to be able to drive the robot around using the keyboard.
-
-\begin{verbatim}
-roslaunch cob_teleop teleop_keyboard.launch 
-\end{verbatim}
-
-Finally, the data is recorded using the rosbag tool. We obviously need the \texttt{/tf}, \texttt{/tf\_static} and \texttt{/scan\_unified} for the SLAM algorithms. The \texttt{/base\_pose\_ground\_truth} is the ground truth data and will be later on used for comparison between algorithms. The \texttt{/base/twist\_controller/command} and  \texttt{/base/odometry\_controller/odometry} are respectively the commands given by the joystick and the calculated odometry after the command has been executed by the robot, and are recorded in case the bag files need to be re-executed.
-
-\begin{verbatim}
-rosbag record /base/odometry_controller/odometry
-              /base/twist_controller/command
-              /base_pose_ground_truth
-              /scan_unified
-              /tf
-              /tf_static
-\end{verbatim}
-
-The data is recorded into a file that can be played at will and will work as the real robot is sending the scans. This ensures every algorithm will get the same working data in the comparisons.
-
-\section{Running the automated reconstruction}
-
-All the steps required for data parsing by the SLAM algorithms were automated to ensure minimal human interaction is required. Once the data has been collected in the previous step, it can be played using the launch file shown in Listing~\ref{lst:parser}.
-
-First, we set the parameters and arguments required. The \texttt{use\_sim\_time} ensures the clock will be used from the bag file, to avoid inconsistencies with time. The robot is set to \texttt{cob4-9} because this model will be uploaded for visualization purposes, and it's not required to run the SLAM. We then select the bag file and the algorithm to run together.
-
-The launch file then calls the mapping algorithm, which will launch one of the files described on \prettyref{sec:slam}. Finally, we call the \texttt{rosbag play} node that will play back data already collected to the algorithm, providing clock with the option \texttt{--clock} and with a delay \texttt{-d 5} of 5 seconds to ensure all nodes are initialized before replaying data.
-
-The last include calls for the RVIZ visualization if requested, as shown on \prettyref{fig:rviz_mapping}.
-
-\begin{lstlisting}[caption={Automated data parser.},label={lst:parser},language=XML]
-<launch>
-
-  <!-- First set up sim time -->
-  <param name="use_sim_time" value="true" />
-
-  <!-- define arguments -->
-  <arg name="robot" default="cob4-9"/>
-  <arg name="bag" default="test1"/>
-  <arg name="slam" default="gmapping"/>
-
-  <!-- Call mapping -->
-  <include file="$(find cob_bringup_sim)/launch/cob_$(arg slam).xml" />
-
-  <!-- Play bag data with clock -->
-  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -q -d 5 $(find cob_bringup_sim)/bags/$(arg bag).bag"/>
-
-  <!-- Show visualization if requested -->
-  <arg name="rviz" default="false"/>
-  <group if="$(arg rviz)">
-    <include file="$(find cob_bringup_sim)/launch/visualization.launch" >
-        <arg name="robot" value="$(arg robot)" />
-    </include>
-  </group>
-</launch>
-\end{lstlisting}
-
-Then, the automated reconstruction can be called:
-
-\begin{verbatim}
-roslaunch cob_bringup_sim parse_data.launch
-                          rviz:=true bag:=test1 slam:=gmapping
-\end{verbatim}
-
-And that will not only launch the bag data \texttt{test1} running Gmapping but also launch a visualization tool to see progress, as shown on \prettyref{fig:rviz_mapping}. The point cloud data resulting from the laser scanners (in red) will be fed to the algorithms and the resulting map (in gray) will be published on the \texttt{map} topic. Every algorithm also publishes the transform from \texttt{map} to \texttt{odom\_combined}.
-
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=.6\linewidth]{rviz_mapping}
-    \caption{Running the automated parser node with Gmapping.}
-    \label{fig:rviz_mapping}
-\end{figure}
-
-\section{Parsing the data}
-
-The data parser is a Python node that will calculate the required metrics. It runs alongside the SLAM algorithm and constantly imports its information listening to the topics and computer resource information. When shut down, the node outputs the desired graphs and metrics. It can be called using the command:
-
-\begin{verbatim}
-rosrun cob_bringup_sim pipeline.py
-\end{verbatim}
-
-The node keeps executing the following tasks in parallel:
-
-\begin{itemize}
-    \item Republishes the ground truth from the ground truth topic (\texttt{/base\_pose\_ground\_truth}, as described in \prettyref{sec:collecting_data}) and republishes it as a tf, since it's easier to do transformations on. 
-    \item Reads the \texttt{/tf} topic and stores a new pose into a pose history whenever the SLAM pose is updated, as well as the ground truth pose at that point in time.
-    \item Collects data from CPU Usage and Memory Usage with an interval of 0.1 seconds.
-\end{itemize}
-
-When the node is shut down, the following tasks are executed:
-
-\begin{itemize}
-    \item The pose history is plotted alongside the ground truth.
-    \item The squared pose error is calculated according to \prettyref{eq:error_squared}.
-    \item The displacement pose error is calculated according to \prettyref{eq:displacement}.
-    \item The CPU and Memory usage are plotted over time, using \texttt{psutil} library \cite{psutil}.
-    \item The summary is generated including the average CPU usage, average Memory usage, translation displacement error, rotation displacement error, translation squared error, rotational squared error.
-\end{itemize}
-
-\section{Exporting the map}
-
-The map can be exported using the the \texttt{map\_saver} node from the package \texttt{map\_server}. To export the map, simply call the node with the option \texttt{-f} and the map name.
-
-\begin{verbatim}
-rosrun map_server map_saver -f map_name
-\end{verbatim}
-
-Since Cartographer uses a different approach for generating submaps, the data has to be saved as a \texttt{.pbstream} first to generate the full map. To generate the map, we first have to tell the node to finish the trajectory calling the \texttt{/finish\_trajectory} service. Then, we export the \texttt{.pbstream} file and use it to generate the map. The following sequence of commands represent this process:
-
-\begin{verbatim}
-rosservice call /finish_trajectory 0
-rosservice call /write_state "filename: '${HOME}/file.pbstream'"
-rosrun cartographer_ros cartographer_pbstream_to_ros_map 
-       -pbstream_filename ${HOME}/file.pbstream
-\end{verbatim}
-
-Because the resulting image for the map doesn't always have the right dimensions (approximately the same as the ground truth map), we have to crop the empty gray areas before running the map comparisons. We also want to convert from \texttt{.pgm} saved automatically to \texttt{.png} that the algorithm expects. To do that, we simply call the conversion function from ImageMagick, using the \texttt{-trim} options to trim the gray borders. Why the image is rotated 90 degrees is explained in the next section.
-
-\begin{verbatim}
-convert -rotate 90 map_name.pgm -trim map_name.png
-\end{verbatim}
+The third map, shown on \figurename~\ref{subfig:test3}, will test how the localization performs without revisiting positions, as the robot goes to the center of the loop without previous information and then comes back. The sequence followed is ABCDEFGHGFEDCBA.
 
 \section{Running ICP on resulting map}
 

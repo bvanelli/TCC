@@ -1,1 +1,23 @@
 \chapter{Conclusions}\label{chp:conclusoes}
+
+% Restate thesis statement
+% Get the main idea from the first paragraph of your essay body
+% Get the main idea from the second paragraph of your essay body
+% Get the main idea from the third paragraph of your essay body
+% Conclude all your main thoughts. Answer the most valuable questions of your paper.
+
+This dissertation presented a framework for methodologically analysing SLAM results for different algorithms in an assistive robot environment. The framework was tested using a simulated version of Care-o-bot, developed by Fraunhofer IPA. First, the problem was stated, emphasizing why mapping is a big challenge in mobile robots. The current limitations of mapping benchmarks were discussed. The main aspects of ROS and COB were introduced to give the reader a good understanding of their concepts. The SLAM problem was detailed and some methodologies were proposed, based on the literature review about the subject. Tools were developed to aid the process of comparison, including a map ground-truth generator and a data parser. Finally, four algorithms (Gmapping, Hector, Karto and Cartographer) were benchmarked and tested against the proposed framework.
+
+The tests can give us some insight about the metrics chosen to represent the accuracy of each algorithm. The displacement error and the squared error were consistent with each other. Those measurements were also coincident with the visual quality of the final map.
+
+The CPU and memory metrics were important to analyse the footprint of the robot in each scenario, as well as giving an indication on how the algorithm would behave with continued execution. Even though the modern dedicated hardware found current robots like Care-o-bot is quite powerful, their importance comes with the fact that the lower processing power would require less energy, important in mobile robot depending on batteries, and allow for more utilities to be executed in the same processor, possibly reducing the number of processors needed.
+
+Comparison through ICP and free-space were by far the most important, comparing directly the result of mapping to the exact ground-truth. The ICP comparison gives us a quantitative metric to compare the maps, that shows exactly by how much the walls are out of place and how much noise there is in the reconstruction. The free space comparison shows how well scaled the map, as shorter walls and corridors would increase this metric.
+
+Overall, the chosen algorithms performed very well on all the tests performed. Cartographer scored best in the map accuracy, what is expected considering that it was built to outperform the popular algorithms at the time. It is important to say that few of the possibilities of Cartographer were explored as it also supports 3D SLAM using a point cloud. Gmapping showed consistent results, justifying it's wide adoption in the robotic world. Hector didn't perform as well, but it was released to be effective in uneven terrain in rescue robots, conditions not present in the scenario proposed. Since the original robot tested with Hector had a very limited processor, the modest CPU usage is very fit for its purpose. Karto, tied with Hector, showed good enough results, but its lack of documentation and no recent updates are strong points, and since only a portion of Karto is released to the public, the majority of its development is kept closed source code.
+
+\section{Future work}
+
+Since the goal was to have small and objective tests, not all aspects of a reliable SLAM algorithm were covered. The aspect of robustness, for instance, was not explored in this dissertation. It is important to say that this benchmarks only contemplate 2D SLAM. There is a wide selection of algorithms that perform 3D SLAM, one of them being Cartographer, that could be analysed, as the 3D SLAM can be converted into 2D SLAM for comparison.
+
+%As of future work, 

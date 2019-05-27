@@ -250,7 +250,7 @@ There are many pre-built plugins available at Gazebo library, including Cameras 
 
 \section{COB}
 
-The Care-o-bot is a project for a mobile assistive robot that is modular, developed and maintained by Fraunhofer IPA. The COB version 4 can be seen on \prettyref{fig:cob4}. The robot was composed not only to provide researchers a reliable mobile base, but also to aid research on human-robot interaction and social behavior \cite{mci/Kittmann2015}. It is composed mainly by a mobile base, a torso, and a head.
+Care-o-bot is a project for a mobile assistive robot that is modular, developed and maintained by Fraunhofer IPA. COB's fourth version, \prettyref{fig:cob4}, was designed not only to provide researchers a reliable mobile base, but also to aid research on human-robot interaction and social behavior \cite{mci/Kittmann2015}. It is composed mainly by a mobile base, a torso, and a head.
 
 % TODO: editar a imagem para conter descrição de partes
 \begin{figure}[!ht]
@@ -262,17 +262,17 @@ The Care-o-bot is a project for a mobile assistive robot that is modular, develo
 
 \subsection{Base}
 
-The base features three steerable wheels used for moving the robot on the ground. Because the modularity, the wheels can be configured to behave using Ackermann kinematics, moving forward and backward and rotating on the vertical axis, but also Omnidirectional kinematics, allowing the robot to move in every direction. The maximum speed supported is 1,1 m/s. It is also equipped with three 2D laser scanners with 360$^{\circ}$ coverage for object detection and safety, and the battery for the robot and the control panel.
+The base features three steerable wheels used for moving the robot on the ground. Because the modularity, the wheels can be configured to use Ackermann kinematics, moving forward and backward and rotating on the vertical axis, but also Omnidirectional kinematics, allowing the robot to move in every direction. The maximum speed supported is 1,1 m/s. It is also equipped with three 2D laser scanners with 360$^{\circ}$ coverage for object detection and safety, and the battery pack to power the robot and the control panel.
 
 \subsection{Torso}
 
-The torso is linked with the base, and can be configured to be fixed (the torso doesn't move), to use a Pan joint (allowing for a full rotation) or using a spherical joint (providing 3DOF). It can have two optional arms with 7DOF, each with a manipulator finger with 2DOF.
-
-The manipulator also has a 3D camera and laser scanner for object recognition and picking, as well as LEDs for illumination. The torso also provides 3D cameras and sensors for computer vision activities that cover up the front of the robot and an LED Ring for signaling and an emergency stop.
+The torso is linked with the base, and can be configured to be fixed (the torso doesn't move), to use a Pan joint (allowing for a full rotation) or using a spherical joint (providing 3DOF). It can have two optional arms with 7DOF, each with a robotic hand with two fingers (2 DOF hand).
 
 \subsection{Arms}
 
-The arm is composed of three SCHUNK Powerball ERB modules and one PRL+ 100 module, a rotary actuator, in the shoulder. The arm is a variation of the commercially available Schunk arm called LWA4P, which has 6 DOF and is composed of three Powerball ERB, with 2 DOF each. The last degree of freedom is provided by the PRL+, allowing one rotation around the shoulder and totaling 7 DOF. \prettyref{fig:schunk_lwa4p_extended} shows the full arm in simulation. The manipulator's finger was developed by Schunk specifically for this robot.
+Arms are composed of three SCHUNK Powerball ERB modules and one PRL+ 100 module, a rotary actuator, in the shoulder. The arm is a variation of the commercially available Schunk arm called LWA4P, which has 6 DOF and is composed of three Powerball ERB, with 2 DOF each. The last degree of freedom is provided by the PRL+, allowing one rotation around the shoulder and totaling 7 DOF. \prettyref{fig:schunk_lwa4p_extended} shows the full arm in simulation. The manipulator's finger was developed by Schunk specifically for this robot.
+
+The manipulator also has a 3D camera and laser pointer for object recognition and picking, as well as LEDs for illumination. The torso also provides 3D cameras and sensors for computer vision activities that cover up the front of the robot and an LED Ring for signaling and an emergency stop.
 
 \begin{figure}[!ht]
     \centering
@@ -291,7 +291,7 @@ The head is linked with the torso, allowing for both a pan joint or a spherical 
 
 \subsection{Package organization}
 
-The COB is built around ROS and combines different sets of packages for different purposes. Since the robot support different configurations (manipulators, joints, mobile bases), some packages are optional. \prettyref{fig:dependency-graph} shows the dependency graph for the first three layers of packages. Notice that the arrangement is quite intricate even showing only the packages written exclusively for COB (not showing other ROS packages used on COB).
+COB is built around ROS and combines different sets of packages for different purposes. Since the robot support different configurations (manipulators, joints, mobile bases), some packages are optional. \prettyref{fig:dependency-graph} shows the dependency graph for the first three layers of packages. Notice that the arrangement is quite intricate even showing only the packages written exclusively for COB (not showing other ROS packages used on COB).
 
 \begin{figure}[!ht]
 \centering
@@ -324,7 +324,7 @@ COB also features high-level capabilities, some of them being:
 
 Most of the capabilities of COB are exposed in the form of topics and services, forming a higher level API and sparing the user from interacting with low-level sensors and actuators.
 
-The actuators move the three wheels on the base. Since the base kinematics is already calculated by the node, you only need to supply a \texttt{geometry\_msgs/Twist} type message with linear and angular velocities and the drivers will take care of the rest. The topic names can be seen on \prettyref{tab:baseapi}.
+The actuators move the three wheels on the base. Since the base kinematics is already calculated by the node, you only need to publish a \texttt{geometry\_msgs/Twist} type message with linear and angular velocities and the drivers will take care of the rest. The topic names can be seen on \prettyref{tab:baseapi}.
 
 \begin{table}[!ht]
 \caption{Base command API.} \label{tab:baseapi}
@@ -355,7 +355,7 @@ Topic Name & Message Type & Information \\
 }
 \end{table}
 
-The Arms, the Grippers and the sensor ring are similar to the torso and head, as they act as a service and receive the same message type. Their API is shown on \prettyref{tab:armapi}.
+The arms, the grippers and the sensor ring are similar to the torso and head, as they act as a service and receive the same message type. Their API is shown on \prettyref{tab:armapi}.
 
 \begin{table}[!ht]
 \caption{Arms and grippers command API.} \label{tab:armapi}
@@ -389,7 +389,7 @@ Topic Name & Message Type & Information \\
 \end{tabular}
 \end{table}
 
-There are also cameras in the torso, head and in the sensor ring that collect both raw images and a Point Cloud representation that includes the distance of each point to the focal point of the camera. Their respective topics can be seen on \prettyref{tab:cameraapi}.
+There are also cameras in the torso, head and in the sensor ring that collect both raw images and a point cloud representation that includes the distance of each point to the focal point of the camera. Their respective topics can be seen on \prettyref{tab:cameraapi}.
 
 \begin{table}[!ht]
 \caption{Cameras API.} \label{tab:cameraapi}
