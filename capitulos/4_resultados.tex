@@ -212,16 +212,16 @@ The node keeps executing the following tasks in parallel:
 \begin{itemize}
     \item Republishes the ground truth from the ground truth topic (\texttt{/base\_pose\_ground\_truth}, as described in \prettyref{sec:collecting_data}) and republishes it as a tf, since it's easier to do transformations on. 
     \item Reads the \texttt{/tf} topic and stores a new pose into a pose history whenever the SLAM pose is updated, as well as the ground truth pose at that point in time.
-    \item Collects data from CPU Usage and Memory Usage with an interval of 0.1 seconds.
+    \item Collects data from CPU Usage and Memory Usage with an interval of 0.1 seconds using the \texttt{psutil} library \cite{psutil}.
 \end{itemize}
 
 When the node is shut down, the following tasks are executed:
 
 \begin{itemize}
     \item The pose history is plotted alongside the ground truth.
-    \item The squared pose error is calculated according to \prettyref{eq:error_squared}.
-    \item The displacement pose error is calculated according to \prettyref{eq:displacement}.
-    \item The CPU and Memory usage are plotted over time, using \texttt{psutil} library \cite{psutil}.
+    \item The squared pose error is calculated according to \prettyref{sec:metrics}.
+    \item The displacement pose error is calculated according to \prettyref{sec:metrics}.
+    \item The CPU and Memory usage are plotted over time.
     \item The summary is generated including the average CPU usage, average Memory usage, translation displacement error, rotation displacement error, translation squared error, rotational squared error.
 \end{itemize}
 
@@ -256,7 +256,7 @@ The mapping results for the three test maps designed on \prettyref{sec:selecting
 
 At visual inspection, we can see that for the first map (\prettyref{fig:results1}), Karto Slam and Cartographer perform better, as the noise in the walls is lower. They look straight and sharp, as opposed to Gmapping and Hector, where the walls look noisy. If we inspect the results of \prettyref{tab:results1}, we can see that this reflects in Karto having the lowest localization error between all algorithms for this map for all metrics. Even though the Hector reconstruction is not as great, it scores second place in localization error, followed by Cartographer and finally Gmapping, although Cartographer is better at poses and Gmapping is better at angles.
 
-In the second map, \prettyref{fig:results2}, the results are quite the opposite, with Hector and Cartographer performing better visually. Hector shows the best pose estimate in displacement, but Gmapping overcomes in squared error. Karto remains with good results but Cartographer lags behind. We can actually see why looking at the map, as Cartographer's map is tilted relative to the others. This error of orientation at the start was probably what made Cartographer perform worse in the localization.
+In the second map, \prettyref{fig:results2}, the results are quite the opposite. Hector shows the best pose estimate in displacement, but Gmapping overcomes in squared error. Karto remains with good results but Cartographer lags behind. We can actually see why looking at the map, as Cartographer's map is tilted relative to the others. This error of orientation at the start was probably what made Cartographer perform worse in the localization.
 
 In terms of average CPU and Memory usage, the values remained constant throughout the tests. Gmapping shows the highest usage of CPU among all algorithms, consuming almost double of Cartographer, in second place. Karto and Hector show low consumption of CPU, with Hector being the lowest. In terms of memory, Hector jumps ahead in all tests, followed by Gmapping, Hector and finally Cartographer. It is important to notice that despite having low CPU and memory footprint, we are only taking into consideration the SLAM node for Cartographer, and not the obstacle grid node nor the offline tasks executed by the \texttt{.pbstream} conversion.
 
@@ -350,7 +350,7 @@ In terms of average CPU and Memory usage, the values remained constant throughou
 \end{table}
 \clearpage
 
-In the third map, Cartographer seems to outperform every other algorithm in every metric, resulting in a much better map, followed by Karto, and finally Gmapping and Hector with very similar results. It is clear from analyzing the pose error from all the algorithm runs that this method is not giving a good way of measuring accuracy, at least for this test case.
+In the third map, Cartographer outperforms every other algorithm in every metric, resulting in a much better map, followed by Karto, and finally Gmapping and Hector with very similar results. It is clear from analyzing the pose error from all the algorithm runs that this method is not giving a good way of measuring accuracy, at least for this test case.
 
 The results of running the ICP matcher with the algorithms can be seen on \prettyref{tab:results_icp}. The best algorithm in all cases was Cartographer, scoring lowest. This means two things: most of the walls were placed in the correct spot and the noise is low. In the second place, Gmapping could outperform Hector and Karto, justifying the wide adoption of Gmapping in the robotic world, as it is far easier to set up than Cartographer. Hector and Karto were tied in the last position in this test, as Hector was better at the first map, Karto was better in the second map and the results are approximately the same in the third map.
 
@@ -391,7 +391,7 @@ When modeling free space, most of the algorithms show the same result, with Gmap
 \label{tab:results_whitespace}
 \end{table}
 
-We are going to analyze the CPU and Memory profiles for each algorithm running in the second map. Figures \ref{fig:gmapping_cpu} to \ref{fig:cartographer_cpu} show both the CPU usage and RAM Memory used over time. The $x$ axis represents the number of samples, and since the acquisition frequency was 10 Hz, every 500 samples are equivalent to 50 seconds.
+We are going to analyze the CPU and Memory profiles for each algorithm. To avoid generating too many graphics, only the profile for the second map will be shown because it features both localization and loop closure. Figures \ref{fig:gmapping_cpu} to \ref{fig:cartographer_cpu} show both the CPU usage and RAM Memory used over time. The $x$ axis represents the number of samples, and since the acquisition frequency was 10 Hz, every 500 samples are equivalent to 50 seconds.
 
 \prettyref{fig:gmapping_cpu} shows how Gmapping performs when running. It is possible to see that the CPU peaks at a value of more than 100\% every few iterations, and most of the time it stays around 10\%. This peak every few iterations is the result of each laser scan being processed, and the effort seems to stay constant until the end, peaking around the same value. The memory grows in small incremental steps as the map is being constructed, and stops at around 1000 samples, where the map is already near the final state and only a few bits of new information are added.
 

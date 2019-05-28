@@ -39,7 +39,7 @@ D = \frac{1}{2} \frac{c \cdot \phi}{\omega} = \frac{1}{4 \pi} \frac{c \cdot \phi
 
 %Even though it is possible to recreate a 3D model of the environment using LIDAR laser scanners, discussed in the last subsection, those sensors coast thousands of dollars and are not very suited for robotics. Fortunately, it is possible to replace those sensors with 3D cameras capable of registering depth based on image processing techniques.
 
-\section{Localizing the robot}
+\section{Localizing the robot} \label{sec:localizing}
 
 \subsection{Wheel Odometry}
 
@@ -230,7 +230,7 @@ The most natural way of analyzing the poses is the squared error from the pose e
  
  \citeauthor{santos2013evaluation} propose a more in-depth comparison with the publicly available SLAM algorithms that run on ROS. The authors ran both noise-free simulation and real-life experiments with the scenarios and analyzed. The maps collected were binarized and aligned and error metric was defined as the normalized sum of distances from all pixels in the resulting map to its nearest neighbour in the ground-truth map. The error metrics were analyzed, also evaluating the CPU usage for each algorithm. The authors, however, didn't provide extensive information on how the maps were aligned, very crucial since the fit has to be optimal in order to do an adequate comparison.
  
- \section{Proposed Evaluation techniques}
+ \section{Proposed Evaluation techniques} \label{sec:proposed-evaluation}
  
  In order to better evaluate the algorithms, general guidelines will be respected:
  
@@ -326,6 +326,75 @@ The first map can be seen on \figurename~\ref{subfig:test1}. It is meant to test
 The second map seen on \figurename~\ref{subfig:test2}. It is a more complex version of the first map. It will test the capability of the algorithm to maintain scale between different rooms, as the corridor on the left and the loop on the right are separated by walls. The robots starts at A and follows the sequence ABCDEFG. It then returns to the home position through D, totalling ABCDEFGDCBA.
 
 The third map, shown on \figurename~\ref{subfig:test3}, will test how the localization performs without revisiting positions, as the robot goes to the center of the loop without previous information and then comes back. The sequence followed is ABCDEFGHGFEDCBA.
+
+\section{Calculating metrics} \label{sec:metrics}
+
+\prettyref{sec:proposed-evaluation} proposed the metrics that will be used to evaluate the algorithms. \prettyref{fig:metrics} illustrates some of the measurements that are taken between two estimated poses $x_i$ and $x_j$, in green, and two ground-truth poses, $x_i^*$ and $x_j^*$, in red.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=.9\linewidth]{metrics}
+    \caption{Representation of metrics taken.}
+    \label{fig:metrics}
+\end{figure}
+
+Recalling \prettyref{sec:localizing}, the robot position relative to the global reference frame can be represented by two coordinates for the Cartesian position and one for the orientation. Let's define $x_i = [x^c_i, y^c_i, \theta_i]$ and $x_j = [x^c_j, y^c_j, \theta_j]$.
+
+The displacements $\delta_{i,j}$ and $\delta_{i,j}^*$ are calculated by taking the relative transformation between two poses $i$ and $j$:
+
+\begin{equation}
+\delta_{i,j} = x_j - x_i =
+\begin{bmatrix}
+x^c_j - x^c_i \\
+y^c_j - y^c_i \\
+\theta_j - \theta_i
+\end{bmatrix}
+\end{equation}
+
+The goal is to calculate the contributions $trans(\delta_{i,j} \ominus \delta_{i,j}^*)$ and $rot(\delta_{i,j} \ominus \delta_{i,j}^*)$, respectively the pose displacement and the angle displacement. As mentioned, these transformations can be calculated using the Euclidian distance.
+
+\begin{equation}
+trans(\delta_{i,j} \ominus \delta_{i,j}^*) =
+((x^c_j - x^c_i) - (x^{c*}_j - x^{c*}_i))^2 + 
+((y^c_j - y^c_i) - (y^{c*}_j - y^{c*}_i))^2
+\end{equation}
+
+\begin{equation}
+rot(\delta_{i,j} \ominus \delta_{i,j}^*) = 
+((\theta_j - \theta_i) - (\theta_j^* - \theta_i^*))^2
+\end{equation}
+
+\citeauthor{kummerle2009measuring} proposes to select the pairs $(i,j)$ from the dataset using scan matching evaluated by a human operator. Since our dataset have the ground-truth, all possible displacements can be evaluated. Given a set o $N$ poses, the pose displacement can then be represented by:
+
+\begin{equation}
+\text{Pose displacement} = \frac{1}{N^2} \sum_{i = 1}^N \sum_{j = 1}^N trans(\delta_{i,j} \ominus \delta_{i,j}^*)
+\end{equation}
+
+and the angle displacement by:
+
+\begin{equation}
+\text{Angle displacement} = \frac{1}{N^2} \sum_{i = 1}^N \sum_{j = 1}^N rot(\delta_{i,j} \ominus \delta_{i,j}^*)
+\end{equation}
+
+The squared error is easier to calculate, as it relates only to the current pose. We can define the same separate metrics for the translation and rotation from the estimated pose to the ground-truth pose:
+
+\begin{equation}
+trans(d_i) = (x^{c*}_i - x^{c*}_i)^2 + (y^{c*}_j - y^{c*}_j)^2
+\end{equation}
+
+\begin{equation}
+rot(d_i) = (\theta_i - \theta^*_i)^2
+\end{equation}
+
+The individual pose errors are then summed across the trajectory and normalized.
+
+\begin{equation}
+\text{Pose squared error} = \sum_{i=1}^N \frac{1}{N} trans(d_i)
+\end{equation}
+
+\begin{equation}
+\text{Angle squared error} = \sum_{i=1}^N \frac{1}{N} rot(d_i)
+\end{equation}
 
 \section{Running ICP on resulting map}
 
