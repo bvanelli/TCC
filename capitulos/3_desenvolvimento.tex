@@ -117,8 +117,6 @@ Since every measurement is noisy, the position can only be represented as a \tex
 
 There are three main approaches to solve this problem and calculate the belief: Extended Kalman Filters, Particle Filters, and Graph-based.
 
-\subsection{Representing the map}
-
 One of the concerns of mobile robots is how to build a map that is compatible with the environment and represents obstacles properly. While in some applications it is possible to have a pre-compiled map from the environment using the floor plan as a reference, those can be obsolete when dealing with highly dynamic environments or when objects get in the way. Even in static environments, there is a need to compensate for faulty or noise sensors, errors in the localization, and the pre-compiled maps should only be used as complementary information. One of the techniques that emerged to solve these problems, and later was adopted as the core of many SLAM algorithms, is the Occupancy Grid \cite{elfes1989using} representation.
 
 The Occupancy Grid is a form of representing obstacles in 2D or 3D where each cell on the grid stores the probabilistic information of that area. This especially useful because it provides a comprehensive way to fuse sensor data, based on probability, instead of out-of-the-box algorithms that require fine tuning to work.
@@ -239,6 +237,7 @@ The most natural way of analyzing the poses is the squared error from the pose e
      \item Different maps will be tested to ensure no algorithm is favored. In each run, each algorithm will receive the same working data in the form as ROS bags.
      \item The scenario will be simulated in a map carefully generated using a public tool, to make sure everyone can generate the same testing data.
      \item Maps will test the ability for the algorithm to do accurate mapping, accurate localization, and loop-closure. Different metrics will be used to ensure all these three aspects of each map are analyzed.
+     \item Each algorithm will be run using the stock configuration. The goal is to test how each algorithm performs in the general case, instead of finding the optimal configuration that gives us the best results for a specific test.
  \end{itemize}
  
 The manuscripts discussed in \prettyref{sec:evaluating} already give us a good indication of what to aim for in a comparison algorithm. The first metric chosen is the one described in \cite{kummerle2009measuring}, as it best describes local error in the form of displacements when analyzing the trajectory of the robot. Since the ground-truth data is now available and doesn't have to be inferred by a human operator, the process can be done autonomously and we can ensure the data perfectly matches the environment. For comparison, we are also going to include the squared error metrics proposed in \prettyref{eq:error_squared}.
@@ -310,7 +309,7 @@ Each wall can be represented by the XML shown in Listing~\ref{lst:sdf_body}. Eac
 
 \section{Experimental maps}\label{sec:selecting_maps}
 
-The maps have to be selected to include the scenarios encountered in real life. We selected three maps shown in \prettyref{fig:generated_maps}.
+The maps have to be selected to include the scenarios encountered in real life. We selected three maps shown in \prettyref{fig:generated_maps}. The selection was based on some to test three key elements in SLAM: loop closure, scale and navigation.
 
 \begin{figure}[!ht]
      \centering

@@ -18,9 +18,11 @@ Overall, the chosen algorithms performed very well on all the tests performed. C
 
 \section{Future work}
 
-Since the goal was to have small and objective tests, not all aspects of a reliable SLAM algorithm were covered. The aspect of robustness, for instance, was not explored in this dissertation. It is important to say that this benchmarks only contemplate 2D SLAM. There is a wide selection of algorithms that perform 3D SLAM, one of them being Cartographer, that could be analysed, as the 3D SLAM can be converted into 2D SLAM for comparison.
+Since the goal was to have small and objective tests, not all aspects of a reliable SLAM algorithm were covered. The aspect of robustness, for instance, was not explored in this dissertation. It is important to say that these benchmarks only contemplate 2D SLAM. There is a wide selection of algorithms that perform 3D SLAM, one of them being Cartographer, that could be analyzed, as the 3D SLAM can be converted into 2D SLAM for comparison.
 
-Other tests might include adding bigger maps, to see how well algorithms perform. The aspect of large empty areas also needs to be tested, as algorithms that do not depend on odometry wouldn't have a reference to follow. The same happens in long corridors, or featureless environments.
+Another aspect not tested here is how the algorithms perform using different configurations. Cartographer offers a lot of configurations regarding the scan matching, pose optimization, filters and even the option to tune Ceres separately. Gmapping offers the option to tune the number of particles and the resampling threshold.
+
+Other tests might include adding bigger maps, to see how well algorithms perform. The aspect of large empty areas also needs to be tested, as algorithms that do not depend on odometry wouldn't have a reference to follow. The same happens in long corridors or featureless environments.
 
 Another interesting metric would be tolerance to flaws. How each algorithm performs with a noisy sensor or when the odometry has errors (drift, collision or even kidnapped robot) is very important when designing a fault tolerant localization system.
 
