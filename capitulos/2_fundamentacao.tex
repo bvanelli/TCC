@@ -9,7 +9,7 @@ There are many problems when developing robot applications, especially because o
 The main aspects of ROS are \cite{quigley2009ros}:
 
 \begin{itemize}
-\item Peer-to-peer: even though the ROS framework relies on a master or namespace as a lookup mechanism, the communication is established between peers, avoiding unnecessary routing through slow links when the recipient is on the subnet.
+\item Peer-to-peer: even though the ROS framework relies on a master or namespace as a lookup mechanism, the communication is established between peers, avoiding unnecessary routing through slow links when the recipient is on the same subnet.
 \item Tools-based: instead of building an intricate framework, ROS relies on a set of tools written to perform specific tasks, including various tools for compilation, tap data stream, data plotting, configuration, documentation generation, etc. Custom tools can even be written by the user in the form of new packages.
 \item Multi-lingual: since communication between nodes relies only on XML-RPC, they can be implemented in any language, either by explicitly writing the full library that interacts with the ROS Core or building a wrapper for the ROS C++ library.
 \item Thin: many robots implementations have parts of the code that could be reused in another project if they weren't so entangled with all existing code. ROS proposes an architecture where the code is separated into packages that hold no dependency on ROS. All packages can be built individually using CMake, different from the traditional software paradigm where one CMake file builds the entire project.
@@ -47,7 +47,7 @@ The topics are implemented in the XML-RPC protocol, using a master node in order
 \item Subscriber connects using the selected protocol.
 \end{enumerate}
 
-It's important to notice that, once the connection is established, the communication is maintained peer-to-peer, using former protocols like TCPROS, built over TCP/IP, and UDPROS, built over UDP. This not only provides faster communication inside the same network by not requiring the messages to be relayed through the master but also enables communication through available networks of the Internet protocol suite, including 802.11X wireless transmission.
+The process described above is illustrated in \prettyref{fig:rostopic}. It's important to notice that, once the connection is established, the communication is maintained peer-to-peer, using former protocols like TCPROS, built over TCP/IP, and UDPROS, built over UDP. This not only provides faster communication inside the same network by not requiring the messages to be relayed through the master but also enables communication through available networks of the Internet protocol suite, including 802.11X wireless transmission.
 
 The topic configuration also enables true agnostic packages, since the communication between them will be done using a standardized communication medium, loosely coupling the packages and making them easily maintainable. Debugging can also be done using command-line tools that wiretap this medium and display the information exchanged by nodes.
 
@@ -159,7 +159,7 @@ All the robot description is made using a URDF file or an SDF file. The URDF or 
 
 \subsection{URDF}
 
-URDF files starts describing each link of the robot and it's respective inertia. \prettyref{fig:gazebo-sim} show an example of three links of the robot Turtlebot3 Waffle \cite{turtlebot3}: \texttt{base\_footprint}, \texttt{wheel\_left\_link} and \texttt{wheel\_right\_link}. They are loaded from STL or Collada files included in the project. \prettyref{fig:gazebo-stl} show the STL renders for the robot shown on \prettyref{fig:gazebo-sim}.
+URDF files starts describing each link of the robot and it's respective inertia. \prettyref{fig:gazebo-sim} show an example of the robot Turtlebot3 Waffle \cite{turtlebot3} consisting of three links: \texttt{base\_footprint}, \texttt{wheel\_left\_link} and \texttt{wheel\_right\_link}. They are loaded from STL or Collada files included in the project. \prettyref{fig:gazebo-stl} show the STL renders for the robot shown on \prettyref{fig:gazebo-sim}.
 
 \begin{figure}[!ht]
 \centering
@@ -181,7 +181,7 @@ The SDF is an improvement of the URDF descriptor format that supports more funct
 \item Choosing a physics engine.
 \end{itemize}
 
-\subsection{Physics Engines}
+\subsection{Physics engines}
 
 In order to simulate the physical conditions of the robot and the environment, Gazebo supports four different physics engines: ODE, Bullet, Simbody, and DART. At the start of each simulation, the user can select the desired physics engine changing the startup flags for the program, or configure it on the SDF file.
 
@@ -256,7 +256,7 @@ Care-o-bot is a project for a mobile assistive robot that is modular, developed 
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=.8\linewidth]{cob4}
-\caption{COB 4 full robot with both manipulators.}
+\caption{COB 4 full robot with both manipulators \cite{care-o-bot-image-full}}
 \label{fig:cob4}
 \end{figure}
 
@@ -266,7 +266,7 @@ The base features three steerable wheels used for moving the robot on the ground
 
 \subsection{Torso}
 
-The torso is linked with the base, and can be configured to be fixed (the torso doesn't move), to use a Pan joint (allowing for a full rotation) or using a spherical joint (providing 3DOF). It can have two optional arms with 7DOF, each with a robotic hand with two fingers (2 DOF hand).
+The torso is linked with the base, and can be configured to be fixed (the torso doesn't move), to use a Pan joint (allowing for a full rotation) or using a spherical joint (providing 3DOF). It can have two optional arms with 7DOF, each with a robotic hand with two fingers (2 DOF hand). The torso also features 3D cameras on the front and in the back.
 
 \subsection{Arms}
 

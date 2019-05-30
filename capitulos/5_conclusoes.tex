@@ -6,6 +6,8 @@
 % Get the main idea from the third paragraph of your essay body
 % Conclude all your main thoughts. Answer the most valuable questions of your paper.
 
+\section{Final considerations}
+
 This dissertation presented a framework for methodologically analysing SLAM results for different algorithms in an assistive robot environment. The framework was tested using a simulated version of Care-o-bot, developed by Fraunhofer IPA. First, the problem was stated, emphasizing why mapping is a big challenge in mobile robots. The current limitations of mapping benchmarks were discussed. The main aspects of ROS and COB were introduced to give the reader a good understanding of their concepts. The SLAM problem was detailed and some methodologies were proposed, based on the literature review about the subject. Tools were developed to aid the process of comparison, including a map ground-truth generator and a data parser. Finally, four algorithms (Gmapping, Hector, Karto and Cartographer) were benchmarked and tested against the proposed framework.
 
 The tests can give us some insight about the metrics chosen to represent the accuracy of each algorithm. The displacement error and the squared error were consistent with each other. Those measurements were also coincident with the visual quality of the final map.
@@ -26,5 +28,8 @@ Other tests might include adding bigger maps, to see how well algorithms perform
 
 Another interesting metric would be tolerance to flaws. How each algorithm performs with a noisy sensor or when the odometry has errors (drift, collision or even kidnapped robot) is very important when designing a fault tolerant localization system.
 
+\section{Contributions}
 
-%As of future work, 
+The main contribution of this dissertation is the tools for generation and comparison of maps. As the purpose of the proposed techniques is to have reproducible tests, all the code used is available at the following repository on Github: 
+
+\url{https://github.com/bvanelli/TCC}

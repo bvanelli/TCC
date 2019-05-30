@@ -9,13 +9,13 @@ Map Building) algorithms emerged to try and solve these problems, using differen
 
 \section{Sensors}
 
-The laser scanner is the most popular way to capture data about the environment. They work by sending beams of light in a direction and measuring the time it takes for the light to travel back and forth between the object and the sensor, either directly, by measuring time of flight, or indirectly, by measuring the phase-shift \cite{amann2001laser}. As you want the information to be gathered on more than a single point, the scanner can rotate a mirror or even the whole sensor to gather measurements from all directions, as shown on \prettyref{fig:sick_s300_diagram}. The LIDARs that do not contain moving parts are called solid state LIDAR.
+The laser scanner (\figurename~\ref{fig:sick_s300_model}) is the most popular way to capture data about the environment. They work by sending beams of light in a direction and measuring the time it takes for the light to travel back and forth between the object and the sensor, either directly, by measuring time of flight, or indirectly, by measuring the phase-shift \cite{amann2001laser}. As you want the information to be gathered on more than a single point, the scanner can rotate a mirror or even the whole sensor to gather measurements from all directions, as shown on \prettyref{fig:sick_s300_diagram}. The LIDARs that do not contain moving parts are called solid state LIDARs.
 
 \begin{figure}
      \centering
-     \subfloat[][]{\includegraphics[width=80mm]{sick_s300}}
-     \subfloat[][]{\includegraphics[width=80mm]{sick_s300_diagram}\label{fig:sick_s300_diagram}}
-     \caption{SICK S300 Laser Scanner \cite{sicks300}.}
+     \subfloat[][Sick S300 safety laser scanner.]{\includegraphics[width=80mm]{sick_s300}\label{fig:sick_s300_model}}
+     \subfloat[][Sick S300 range diagram.]{\includegraphics[width=80mm]{sick_s300_diagram}\label{fig:sick_s300_diagram}}
+     \caption{Laser Scanner \cite{sicks300}.}
      \label{fig:sick_s300}
 \end{figure}
 
@@ -41,7 +41,7 @@ D = \frac{1}{2} \frac{c \cdot \phi}{\omega} = \frac{1}{4 \pi} \frac{c \cdot \phi
 
 \section{Localizing the robot} \label{sec:localizing}
 
-\subsection{Wheel Odometry}
+\subsection{Wheel odometry}
 
 Wheel odometry is one of the most simple ways to determine the position of the robot based on the starting point. Considering a flat surface, simply taking the turns made by each wheel and the steering actions, it is possible to estimate the path the robot took by applying the forward kinematics of the base.
 
@@ -75,7 +75,7 @@ It is easy to calculate the inverse problem using the inverse matrix $R^{-1}(\th
 
 The main disadvantages of wheel odometry are that the robot is limited to flat terrain, and even then slippery and small changes to forward kinematics (i.e. the radius of the wheel changes slightly) can accumulate error over time, as there is not a suitable way to correct the error without other sources of information.
 
-\subsection{Laser Odometry}
+\subsection{Laser odometry}
 
 Laser odometry bases itself on Laser Scanner data to localize the robot. Instead of using odometry to watch how the robot moves in the environment, it uses the collected data to see how the environment moves in relation to the robot.
 
@@ -117,9 +117,9 @@ Since every measurement is noisy, the position can only be represented as a \tex
 
 There are three main approaches to solve this problem and calculate the belief: Extended Kalman Filters, Particle Filters, and Graph-based.
 
-One of the concerns of mobile robots is how to build a map that is compatible with the environment and represents obstacles properly. While in some applications it is possible to have a pre-compiled map from the environment using the floor plan as a reference, those can be obsolete when dealing with highly dynamic environments or when objects get in the way. Even in static environments, there is a need to compensate for faulty or noise sensors, errors in the localization, and the pre-compiled maps should only be used as complementary information. One of the techniques that emerged to solve these problems, and later was adopted as the core of many SLAM algorithms, is the Occupancy Grid \cite{elfes1989using} representation.
+One of the concerns of mobile robots is how to build a map that is compatible with the environment and represents obstacles properly. While in some applications it is possible to have a pre-compiled map from the environment using the floor plan as a reference, those can be obsolete when dealing with highly dynamic environments or when objects get in the way. Even in static environments, there is a need to compensate for faulty or noise sensors, errors in the localization, and the pre-compiled maps should only be used as complementary information. One of the techniques that emerged to solve these problems, and later was adopted as the core of many SLAM algorithms, is the occupancy grid \cite{elfes1989using} representation.
 
-The Occupancy Grid is a form of representing obstacles in 2D or 3D where each cell on the grid stores the probabilistic information of that area. This especially useful because it provides a comprehensive way to fuse sensor data, based on probability, instead of out-of-the-box algorithms that require fine tuning to work.
+The occupancy grid is a form of representing obstacles in 2D or 3D where each cell on the grid stores the probabilistic information of that area. This especially useful because it provides a comprehensive way to fuse sensor data, based on probability, instead of out-of-the-box algorithms that require fine tuning to work.
 
 \begin{figure}[!ht]
     \centering
@@ -148,7 +148,7 @@ The process is iterative and, as measurements from different points of view and 
     \label{fig:occupancy_grid_algorithm}
 \end{figure}
 
-\section{ROS Slam Algorithms}
+\section{ROS SLAM algorithms}
 
 \subsection{Gmapping}
 
@@ -197,7 +197,7 @@ The idea of having submaps is that it is only built using a few scans, meaning t
     \label{fig:cartographer}
 \end{figure}
 
-\section{Evaluating SLAM Performance} \label{sec:evaluating}
+\section{Evaluating SLAM performance} \label{sec:evaluating}
 
 There is a lot of debate on how to evaluate SLAM performance. Since there are plenty of algorithms using different techniques, each one of them having their own set of parameters, there is a need to evaluate them and tell which one does better in each scenario. A lot of this evaluation is done visually, assisted by a human that tells whether the occupancy grid is adequate considering the building floor plans. But as SLAM algorithms get more precise, it is difficult to draw conclusions just from the appearance itself. Plus, there is the problem of not having the floor plants for publicly available datasets, making it harder to compare between methods \cite{kummerle2009measuring}.
 
@@ -228,7 +228,7 @@ The most natural way of analyzing the poses is the squared error from the pose e
  
  \citeauthor{santos2013evaluation} propose a more in-depth comparison with the publicly available SLAM algorithms that run on ROS. The authors ran both noise-free simulation and real-life experiments with the scenarios and analyzed. The maps collected were binarized and aligned and error metric was defined as the normalized sum of distances from all pixels in the resulting map to its nearest neighbour in the ground-truth map. The error metrics were analyzed, also evaluating the CPU usage for each algorithm. The authors, however, didn't provide extensive information on how the maps were aligned, very crucial since the fit has to be optimal in order to do an adequate comparison.
  
- \section{Proposed Evaluation techniques} \label{sec:proposed-evaluation}
+ \section{Proposed evaluation techniques} \label{sec:proposed-evaluation}
  
  In order to better evaluate the algorithms, general guidelines will be respected:
  
@@ -237,7 +237,7 @@ The most natural way of analyzing the poses is the squared error from the pose e
      \item Different maps will be tested to ensure no algorithm is favored. In each run, each algorithm will receive the same working data in the form as ROS bags.
      \item The scenario will be simulated in a map carefully generated using a public tool, to make sure everyone can generate the same testing data.
      \item Maps will test the ability for the algorithm to do accurate mapping, accurate localization, and loop-closure. Different metrics will be used to ensure all these three aspects of each map are analyzed.
-     \item Each algorithm will be run using the stock configuration. The goal is to test how each algorithm performs in the general case, instead of finding the optimal configuration that gives us the best results for a specific test.
+     \item Each algorithm will be run using their default configuration. The goal is to test how each algorithm performs in the general case, instead of finding the optimal configuration that gives us the best results for a specific test.
  \end{itemize}
  
 The manuscripts discussed in \prettyref{sec:evaluating} already give us a good indication of what to aim for in a comparison algorithm. The first metric chosen is the one described in \cite{kummerle2009measuring}, as it best describes local error in the form of displacements when analyzing the trajectory of the robot. Since the ground-truth data is now available and doesn't have to be inferred by a human operator, the process can be done autonomously and we can ensure the data perfectly matches the environment. For comparison, we are also going to include the squared error metrics proposed in \prettyref{eq:error_squared}.
@@ -246,70 +246,9 @@ The second comparison method chosen is the one demonstrated in \cite{santos2013e
 
 The third metric will focus on analyzing the modeled empty space of each algorithm, to see if the area of the generated room matches the area of the map. This is useful in combination with the last algorithm to see how good is the scale on each map.
 
-\section{Building an accurate map}
-
-It is very important to build accurate maps for SLAM testing, as the resulting map has to be compared against the ground truth and any inaccuracies might lead to different results. For that, a map generation script has been written to generate accurate Gazebo SDF descriptions of the desired map.
-
-To generate a map, we begin with the model we want for the map to be generated with a small image file. As an example, \prettyref{fig:map_generation} is 200x200 pixels. We then draw black pixels that will represent the walls in the generated map. After running the script to generate the map, the resulting map can be seen on \prettyref{fig:gazebo_generation}.
-
-\begin{figure}[!ht]
-     \centering
-     \subfloat[][]{\includegraphics[width=.45\linewidth]{map_generation}\label{fig:map_generation}}
-     \hfill
-     \subfloat[][]{\includegraphics[width=.45\linewidth]{gazebo_generation}\label{fig:gazebo_generation}}
-     \caption{Scripted map generation for Gazebo.}
-     \label{fig:map_generation_script}
-\end{figure}
-
-The main body for the SDF world description can be seen on Listing~\ref{lst:sdf_header}. The only information that has to be filled is the \texttt{\{robot\_start\_pose\}} that will define where the robot will start within the map. The \texttt{\{content\}} tag will then contain a list of walls that compose the test scenario.
-
-\begin{lstlisting}[caption={SDF Header.},label={lst:sdf_header},language=XML]
-<?xml version='1.0'?>
-<sdf version='1.6'>
-    <model name='autogenerated'>
-    <pose frame=''>{robot_start_pose} 0 0 0 0</pose>
-    
-    {content}
-    
-    <static>1</static>
-    </model>
-</sdf>
-\end{lstlisting} \label{lst:1}
-
-Each wall can be represented by the XML shown in Listing~\ref{lst:sdf_body}. Each will have a unique link name guaranteed by an increasing integer called \texttt{\{link\_number\}}. The \texttt{\{size\}} and \texttt{\{height\}} are the dimensions of the wall. Finally, the \texttt{\{position\}} and \texttt{\{orientation\}} represent the location of the wall center in the world, relative to \texttt{\{robot\_start\_pose\}}.
-
-\begin{lstlisting}[caption={SDF for a single wall.},label={lst:sdf_body},language=XML]
-        <link name='Wall_{link_number}'>
-            <collision name='Wall_{link_number}_Collision'>
-            <geometry>
-                <box>
-                <size>{size} {height}</size>
-                </box>
-            </geometry>
-            <pose frame=''>0 0 0 0 0 0</pose>
-            </collision>
-            <visual name='Wall_{link_number}_Visual'>
-            <pose frame=''>0 0 0 0 0 0</pose>
-            <geometry>
-                <box>
-                <size>{size} {height}</size>
-                </box>
-            </geometry>
-            <material>
-                <script>
-                <uri>file://media/materials/scripts/gazebo.material</uri>
-                <name>Gazebo/Grey</name>
-                </script>
-                <ambient>1 1 1 1</ambient>
-            </material>
-            </visual>
-            <pose frame=''>{position} 0 0 0 {orientation}</pose>
-        </link>
-\end{lstlisting}
-
 \section{Experimental maps}\label{sec:selecting_maps}
 
-The maps have to be selected to include the scenarios encountered in real life. We selected three maps shown in \prettyref{fig:generated_maps}. The selection was based on some to test three key elements in SLAM: loop closure, scale and navigation.
+The maps have to be designed to include the scenarios encountered in real life. Three maps were designed and can be seen in \prettyref{fig:generated_maps}. The selection aims at testing three key elements in SLAM: loop closure, scale and localization.
 
 \begin{figure}[!ht]
      \centering
@@ -326,7 +265,7 @@ The second map seen on \figurename~\ref{subfig:test2}. It is a more complex vers
 
 The third map, shown on \figurename~\ref{subfig:test3}, will test how the localization performs without revisiting positions, as the robot goes to the center of the loop without previous information and then comes back. The sequence followed is ABCDEFGHGFEDCBA.
 
-\section{Calculating metrics} \label{sec:metrics}
+\section{Pose metrics} \label{sec:metrics}
 
 \prettyref{sec:proposed-evaluation} proposed the metrics that will be used to evaluate the algorithms. \prettyref{fig:metrics} illustrates some of the measurements that are taken between two estimated poses $x_i$ and $x_j$, in green, and two ground-truth poses, $x_i^*$ and $x_j^*$, in red.
 
@@ -350,52 +289,52 @@ y^c_j - y^c_i \\
 \end{bmatrix}
 \end{equation}
 
-The goal is to calculate the contributions $trans(\delta_{i,j} \ominus \delta_{i,j}^*)$ and $rot(\delta_{i,j} \ominus \delta_{i,j}^*)$, respectively the pose displacement and the angle displacement. As mentioned, these transformations can be calculated using the Euclidian distance.
+The goal is to calculate the contributions $trans(\delta_{i,j} \ominus \delta_{i,j}^*)$ and $rot(\delta_{i,j} \ominus \delta_{i,j}^*)$, respectively the linear displacement and the angular displacement. As mentioned, these transformations can be calculated using the Euclidian distance.
 
 \begin{equation}
-trans(\delta_{i,j} \ominus \delta_{i,j}^*) =
+trans(\delta_{i,j} \ominus \delta_{i,j}^*)^2 =
 ((x^c_j - x^c_i) - (x^{c*}_j - x^{c*}_i))^2 + 
 ((y^c_j - y^c_i) - (y^{c*}_j - y^{c*}_i))^2
 \end{equation}
 
 \begin{equation}
-rot(\delta_{i,j} \ominus \delta_{i,j}^*) = 
+rot(\delta_{i,j} \ominus \delta_{i,j}^*)^2 = 
 ((\theta_j - \theta_i) - (\theta_j^* - \theta_i^*))^2
 \end{equation}
 
-\citeauthor{kummerle2009measuring} proposes to select the pairs $(i,j)$ from the dataset using scan matching evaluated by a human operator. Since our dataset have the ground-truth, all possible displacements can be evaluated. Given a set o $N$ poses, the pose displacement can then be represented by:
+\citeauthor{kummerle2009measuring} proposes to select the pairs $(i,j)$ from the dataset using scan matching evaluated by a human operator. Since our dataset have the ground-truth, all possible displacements can be evaluated. Given a set o $N$ poses, the linear displacement can then be represented by:
 
 \begin{equation}
-\text{Pose displacement} = \frac{1}{N^2} \sum_{i = 1}^N \sum_{j = 1}^N trans(\delta_{i,j} \ominus \delta_{i,j}^*)
+\text{Linear displacement} = \frac{1}{N^2} \sum_{i = 1}^N \sum_{j = 1}^N trans(\delta_{i,j} \ominus \delta_{i,j}^*)^2
 \end{equation}
 
-and the angle displacement by:
+and the angular displacement by:
 
 \begin{equation}
-\text{Angle displacement} = \frac{1}{N^2} \sum_{i = 1}^N \sum_{j = 1}^N rot(\delta_{i,j} \ominus \delta_{i,j}^*)
+\text{Angular displacement} = \frac{1}{N^2} \sum_{i = 1}^N \sum_{j = 1}^N rot(\delta_{i,j} \ominus \delta_{i,j}^*)^2
 \end{equation}
 
 The squared error is easier to calculate, as it relates only to the current pose. We can define the same separate metrics for the translation and rotation from the estimated pose to the ground-truth pose:
 
 \begin{equation}
-trans(d_i) = (x^{c*}_i - x^{c*}_i)^2 + (y^{c*}_j - y^{c*}_j)^2
+trans(d_i)^2 = (x^{c*}_i - x^{c*}_i)^2 + (y^{c*}_j - y^{c*}_j)^2
 \end{equation}
 
 \begin{equation}
-rot(d_i) = (\theta_i - \theta^*_i)^2
+rot(d_i)^2 = (\theta_i - \theta^*_i)^2
 \end{equation}
 
 The individual pose errors are then summed across the trajectory and normalized.
 
 \begin{equation}
-\text{Pose squared error} = \sum_{i=1}^N \frac{1}{N} trans(d_i)
+\text{Linear squared error} = \sum_{i=1}^N \frac{1}{N} trans(d_i)^2
 \end{equation}
 
 \begin{equation}
-\text{Angle squared error} = \sum_{i=1}^N \frac{1}{N} rot(d_i)
+\text{Angular squared error} = \sum_{i=1}^N \frac{1}{N} rot(d_i)^2
 \end{equation}
 
-\section{Running ICP on resulting map}
+\section{Map alignment metric} \label{sec:icp}
 
 Once the map is saved, we have both the reference map and the generated map, as shown in \prettyref{fig:reference_map_icp}. We can then run an algorithm to align the maps properly, as suggested by \citeauthor{santos2013evaluation}.
 
@@ -404,7 +343,7 @@ Once the map is saved, we have both the reference map and the generated map, as 
      \subfloat[][]{\includegraphics[width=.3\linewidth]{test1_cropped}\label{subfig:test1_cropped}}
      \hspace{2cm}
      \subfloat[][]{\includegraphics[width=.3\linewidth]{gmapping_test1}\label{subfig:test1_gmapping}}
-     \caption{Ground truth (left) and SLAM generated map (right).}
+     \caption{Ground truth (a) and SLAM generated map (b).}
      \label{fig:reference_map_icp}
 \end{figure}
 
@@ -415,23 +354,13 @@ First, both maps are imported as a point cloud, each pixel representing a point 
      \subfloat[][]{\includegraphics[width=.45\linewidth]{original_pcl}\label{subfig:original_pcl}}
      \hspace{0cm}
      \subfloat[][]{\includegraphics[width=.45\linewidth]{map_pcl}\label{subfig:map_pcl}}
-     \caption{Ground truth (left) and SLAM generated map (right) represented in point clouds.}
+     \caption{Ground truth (a) and SLAM generated map (b) represented in point clouds.}
      \label{fig:point_cloud}
 \end{figure}
 
 ICP, or Iterative Closest Point, is a state-of-the-art way of aligning 3D meshes. It works by finding the transformation that best aligns two distinct point clouds minimizing the error distance between them. For more information about ICP, refer to \citeauthor{besl1992method}.
 
-The ICP algorithm used is the one provided by \citeauthor{flannigan2019}. It will calculate the transformation that best aligns the two maps shown in \prettyref{fig:point_cloud}. With the maps aligned, we then use the following equation to calculate the error metric, where P is the number of points in \figurename~\ref{subfig:map_pcl}, $p_i$ represents one point in the data set and $p_i^*$ is the nearest neighbour of $p_i$ in the dataset shown on \figurename~\ref{subfig:original_pcl}.
-
-\begin{equation}
-\epsilon(\text{map}) = \frac{1}{P} \sum_{i=1}^P dist(p_i - p_i^*(p_i))^2
-\end{equation}
-
-The aligned point cloud can be seen on \prettyref{fig:alignment_pcl}. To do that, we simply call the node launcher with the desired map and algorithm.
-
-\begin{verbatim}
-roslaunch cob_bringup_sim icp_map_comparison.launch map:=test1 slam:=gmapping
-\end{verbatim}
+The ICP algorithm used is the one provided by \citeauthor{flannigan2019}. It will calculate the transformation that best aligns the two maps shown in \prettyref{fig:point_cloud}. The aligned point cloud can be seen on \prettyref{fig:alignment_pcl}. To do that, we simply call the node launcher with the desired map and algorithm. 
 
 \begin{figure}[!ht]
     \centering
@@ -440,7 +369,15 @@ roslaunch cob_bringup_sim icp_map_comparison.launch map:=test1 slam:=gmapping
     \label{fig:alignment_pcl}
 \end{figure}
 
-\section{Comparing free space} \label{sec:free_space}
+With the maps aligned, we then use the following equation to calculate the error metric, where P is the number of points in \figurename~\ref{subfig:map_pcl}, $p_i$ represents one point in the data set and $p_i^*$ is the nearest neighbour of $p_i$ in the dataset shown on \figurename~\ref{subfig:original_pcl}. All the measurements are in pixels.
+
+\begin{equation}
+\epsilon(\text{map}) = \frac{1}{P} \sum_{i=1}^P dist(p_i - p_i^*(p_i))^2
+\end{equation}
+
+
+
+\section{Free space metric} \label{sec:free_space}
 
 As important as placing the walls in the correct spots, metric that will be checked using ICP, is modeling free space correctly, where the robot can move. This is done by each algorithm by setting the pixels that are free as white. Those white pixels can be counted and checked against the free space in the original map. Since we only want a measurement of scale, we can use the following formula, where $w_o$ is the number of white pixels in the original image and $w_m$ is the number of pixels in the map generated by SLAM:
 
