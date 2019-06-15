@@ -182,19 +182,22 @@ return options
 
 \section{Collecting data} \label{sec:collecting_data}
 
-For data collection, we first start the robot using the command line. We are using \texttt{cob4-9} to avoid having to load unnecessary parts of the robot like the arms or the cameras.
+For data collection, we first start the robot using the following command in the command line:
 
 \begin{verbatim}
 roslaunch cob_bringup_sim robot.launch robot:=cob4-9 robot_env:=test1
 \end{verbatim}
 
-We then launch the controller to be able to drive the robot around using the keyboard.
+We are using \texttt{cob4-9} to avoid having to load unnecessary parts of the robot like the arms or the cameras. We then launch the controller to be able to drive the robot around using the keyboard using the following command:
 
 \begin{verbatim}
 roslaunch cob_teleop teleop_keyboard.launch 
 \end{verbatim}
 
-Finally, the data is recorded using the rosbag tool. We obviously need the \texttt{/tf}, \texttt{/tf\_static} and \texttt{/scan\_unified} for the SLAM algorithms. The \texttt{/base\_pose\_ground\_truth} is the ground truth data and will be later on used for comparison between algorithms. The \texttt{/base/twist\_controller/command} and  \texttt{/base/odometry\_controller/odometry} are respectively the commands given by the joystick and the calculated odometry after the command has been executed by the robot, and are recorded in case the bag files need to be re-executed.
+Finally, the data is recorded using the rosbag tool. We obviously need the \texttt{/tf}, \texttt{/tf\_static} and \texttt{/scan\_unified} for the SLAM algorithms. The topic named \\
+\texttt{/base\_pose\_ground\_truth} is the ground truth data and will be later on used for comparison between algorithms. 
+
+The \texttt{/base/twist\_controller/command} and  \texttt{/base/odometry\_controller/odometry} are respectively the commands given by the keyboard and the calculated odometry after the command has been executed by the robot, and are recorded in case the bag files need to be re-executed. The following command
 
 \begin{verbatim}
 rosbag record /base/odometry_controller/odometry
@@ -205,7 +208,7 @@ rosbag record /base/odometry_controller/odometry
               /tf_static
 \end{verbatim}
 
-The data is recorded into a file that can be played at will and work as the real robot is sending the scans. This ensures every algorithm will get the same working data in the comparisons.
+\noindent records the data being published in these topics into a file that can be played at will and work as the real robot is sending the scans. This ensures every algorithm will get the same working data in the comparisons.
 
 \section{Running the automated reconstruction}
 
@@ -244,7 +247,7 @@ The last include calls for the RVIZ visualization if requested, as shown on \pre
 </launch>
 \end{lstlisting}
 
-Then, the automated reconstruction can be called:
+Then, the automated reconstruction can be called passing as parameter the bag file that was saved and the SLAM algorithm to execute on that bag of data using the following command:
 
 \begin{verbatim}
 roslaunch cob_bringup_sim parse_data.launch
@@ -271,7 +274,7 @@ rosrun cob_bringup_sim pipeline.py
 The node keeps executing the following tasks in parallel:
 
 \begin{itemize}
-    \item Republishes the ground truth from the ground truth topic (\texttt{/base\_pose\_ground\_truth}, as described in \prettyref{sec:collecting_data}) and republishes it as a tf, since it's easier to do transformations on. 
+    \item Republishes the ground truth (\texttt{/base\_pose\_ground\_truth}, as described in \prettyref{sec:collecting_data}) from the ground truth topic and republishes it as a tf, since it's easier to do transformations on. 
     \item Reads the \texttt{/tf} topic and stores a new pose into a pose history whenever the SLAM pose is updated, as well as the ground truth pose at that point in time.
     \item Collects data from CPU Usage and Memory Usage with an interval of 0.1 seconds using the \texttt{psutil} library \cite{psutil}.
 \end{itemize}
@@ -288,7 +291,7 @@ When the node is shut down, the following tasks are executed:
 
 \section{Exporting the map}
 
-The map can be exported using the the \texttt{map\_saver} node from the package \texttt{map\_server}. To export the map, simply call the node with the option \texttt{-f} and the map name.
+The map can be exported using the the \texttt{map\_saver} node from the package \texttt{map\_server}. To export the map, simply call the node with the option \texttt{-f} and the map name, as in the following command:
 
 \begin{verbatim}
 rosrun map_server map_saver -f map_name
@@ -303,13 +306,13 @@ rosrun cartographer_ros cartographer_pbstream_to_ros_map
        -pbstream_filename ${HOME}/file.pbstream
 \end{verbatim}
 
-Because the resulting image for the map doesn't always have the right dimensions (approximately the same as the ground truth map), we have to crop the empty gray areas before running the map comparisons. We also want to convert from \texttt{.pgm} saved automatically to \texttt{.png} that the algorithm expects. To do that, we simply call the conversion function from ImageMagick, using the \texttt{-trim} options to trim the gray borders. Why the image is rotated 90 degrees is explained in \prettyref{sec:icp}.
+Because the resulting image for the map doesn't always have the correct dimensions (approximately the same as the ground truth map), we have to crop the empty gray areas before running the map comparisons. We also want to convert from \texttt{.pgm} saved automatically to \texttt{.png} that the algorithm expects. To do that, we simply call the conversion function from ImageMagick, using the \texttt{-trim} options to trim the gray borders, using the following command:
 
 \begin{verbatim}
 convert -rotate 90 map_name.pgm -trim map_name.png
 \end{verbatim}
 
-After exporting the map, we can calculate the ICP metric using the following command:
+Why the image is rotated 90 degrees is explained in \prettyref{sec:icp}. After exporting the map, we can calculate the ICP metric using the following command:
 
 \begin{verbatim}
 roslaunch cob_bringup_sim icp_map_comparison.launch 
@@ -318,7 +321,7 @@ roslaunch cob_bringup_sim icp_map_comparison.launch
 
 \section{Results}
 
-All the mapping was done in the same machine equipped with an Intel Core i5-4430@3.00 GHz and 8 GB DDR3 memory. All the CPU measurements reflect the usage of a single core, meaning that values higher than 100\% represent the usage of more than one core at a time. The memory measurements are USS or "Unique Set Size", which is the amount of memory that would be freed if the process was terminated. The Gmapping version used was 1.3.10 \cite{gmappinggit}, the Hector version used was 0.3.5 \cite{hectorgit}, the Karto version used was 0.7.3 \cite{kartogit} and the Cartographer version used was 0.3.0 \cite{cartographergit}.
+All the mapping was done in the same machine equipped with an Intel Core i5-4430@3.00 GHz and 8 GB DDR3 memory. All the CPU measurements reflect the usage relative to a single core usage, meaning that values higher than 100\% represent the usage of more than one core at a time. The memory measurements are USS or "Unique Set Size", which is the amount of memory that would be freed if the process was terminated. The Gmapping version used was 1.3.10 \cite{gmappinggit}, the Hector version used was 0.3.5 \cite{hectorgit}, the Karto version used was 0.7.3 \cite{kartogit} and the Cartographer version used was 0.3.0 \cite{cartographergit}.
 
 The mapping results for the three test maps designed on \prettyref{sec:selecting_maps} can be seen on \prettyref{fig:results1}, for the test map 1, \prettyref{fig:results2}, for the test map 2 and \prettyref{fig:results3} for the test map 3. The respective data collected during execution can be seen on \prettyref{tab:results1}, \prettyref{tab:results2} and \prettyref{tab:results3}.
 
@@ -465,7 +468,7 @@ We are going to analyze the CPU and Memory profiles for each algorithm. To avoid
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.8\linewidth]{gmapping_cpu}
+    \includegraphics[width=\linewidth]{gmapping_cpu}
     \caption{CPU and Memory usage for Gmapping running map test 2.}
     \label{fig:gmapping_cpu}
 \end{figure}
@@ -474,7 +477,7 @@ As already mentioned, Hector performs better on CPU and worse on memory. \pretty
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.8\linewidth]{hector_cpu}
+    \includegraphics[width=\linewidth]{hector_cpu}
     \caption{CPU and Memory usage for Hector running map test 2.}
     \label{fig:hector_cpu}
 \end{figure}
@@ -483,7 +486,7 @@ The results for Karto can be seen on \prettyref{fig:karto_cpu}. For CPU, we can 
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.8\linewidth]{karto_cpu}
+    \includegraphics[width=\linewidth]{karto_cpu}
     \caption{CPU and Memory usage for Karto running map test 2.}
     \label{fig:karto_cpu}
 \end{figure}
@@ -492,7 +495,7 @@ Finally, the results for Cartographer can be seen on \prettyref{fig:cartographer
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.8\linewidth]{cartographer_cpu}
+    \includegraphics[width=\linewidth]{cartographer_cpu}
     \caption{CPU and Memory usage for Cartographer running map test 2.}
     \label{fig:cartographer_cpu}
 \end{figure}

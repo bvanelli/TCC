@@ -15,7 +15,7 @@ The laser scanner (\figurename~\ref{fig:sick_s300_model}) is the most popular wa
      \centering
      \subfloat[][Sick S300 safety laser scanner.]{\includegraphics[width=80mm]{sick_s300}\label{fig:sick_s300_model}}
      \subfloat[][Sick S300 range diagram.]{\includegraphics[width=80mm]{sick_s300_diagram}\label{fig:sick_s300_diagram}}
-     \caption{Laser Scanner \cite{sicks300}.}
+     \caption[Laser Scanner.]{Laser Scanner \cite{sicks300}.}
      \label{fig:sick_s300}
 \end{figure}
 
@@ -25,11 +25,13 @@ In the time of flight measurement, a stopwatch is started when the beam of light
 D = \frac{c \cdot t}{2}
 \end{equation}
 
-The second way of calculating the distance is by using phase-shift techniques, assuming there will be a difference in phase between the beam of light emitted and received. This varies according to the frequency and time traveled according to the \prettyref{eq:omegat}, where $\phi$ is the phase-shift, $t$ the time traveled and $\omega$ the angular frequency of the wave. Isolating $t$ and substituting in \prettyref{eq:d}, we can derive the \prettyref{eq:d2} that dictates the distance based on frequency. This technique also requires more complex signal processing structures like a heterodyne for good measurements \cite{siegwart2011introduction}.
+The second way of calculating the distance is by using phase-shift techniques, assuming there will be a difference in phase between the beam of light emitted and received. This varies according to the frequency and time traveled according to
 
 \begin{equation} \label{eq:omegat}
 \phi = \omega \cdot t
 \end{equation}
+
+\noindent where $\phi$ is the phase-shift, $t$ the time traveled and $\omega$ the angular frequency of the wave. Isolating $t$ and substituting in \prettyref{eq:d}, we can derive the \prettyref{eq:d2} that dictates the distance based on frequency. This technique also requires more complex signal processing structures like a heterodyne for good measurements \cite{siegwart2011introduction}.
 
 \begin{equation} \label{eq:d2}
 D = \frac{1}{2} \frac{c \cdot \phi}{\omega} = \frac{1}{4 \pi} \frac{c \cdot \phi}{f}
@@ -48,11 +50,11 @@ Wheel odometry is one of the most simple ways to determine the position of the r
 \begin{figure}
     \centering
     \includegraphics[width=0.4\linewidth]{fk}
-    \caption{Forward Kinematics of Mobile Robot \cite{thrun2005probabilistic}.}
+    \caption[Forward kinematics of mobile robot.]{Forward kinematics of mobile robot \cite{siegwart2011introduction}.}
     \label{fig:fk}
 \end{figure}
 
-Considering the robot from \prettyref{fig:fk}, the position according to the global coordinate system can be represented by $\xi_I = [x, y, \theta]$ and the velocity $\dot{\xi} = [\dot{x}, \dot{y}, \dot{\theta}]$. The velocity model for the robot coordinate system can be written as \cite{thrun2005probabilistic}:
+Considering the robot from \prettyref{fig:fk}, the position according to the global coordinate system can be represented by $\xi_I = [x, y, \theta]$ and the velocity $\dot{\xi} = [\dot{x}, \dot{y}, \dot{\theta}]$. The velocity model for the robot coordinate system can be written as \cite{siegwart2011introduction}:
 
 \begin{equation}
 \dot{\xi_R} = 
@@ -124,7 +126,7 @@ The occupancy grid is a form of representing obstacles in 2D or 3D where each ce
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=.9\linewidth]{grid_steps}
-    \caption{Steps when building an occupancy grid \cite{elfes1989using}.}
+    \caption[Steps when building an occupancy grid.]{Steps when building an occupancy grid \cite{elfes1989using}.}
     \label{fig:grid_steps}
 \end{figure}
 
@@ -135,16 +137,16 @@ Naturally, the obstacle cell is labeled as occupied, with probability 1. All the
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=.9\linewidth]{occupancy_grid}
-    \caption{Occupancy grid for a single sensor.}
+    \caption{Illustration of occupancy grid for a single sensor.}
     \label{fig:occupancy_grid}
 \end{figure}
 
-The process is iterative and, as measurements from different points of view and different sensors grow, the maps become more and more complete, as shown on \prettyref{fig:occupancy_grid_algorithm}. Data fusion between sensors can also be done to build a more accurate global map.
+The process is iterative and, as measurements from different points of view and different sensors grow, the maps become more and more complete, as shown on the occupancy grid proposed by \citeauthor{elfes1989using} seen on  \prettyref{fig:occupancy_grid_algorithm}. Data fusion between sensors can also be done to build a more accurate global map.
 
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=.9\linewidth]{occupancy_grid_algorithm}
-    \caption{Occupancy grid algorithm for multiple sensors.}
+    \caption[Occupancy grid algorithm for multiple sensors proposed by Elfes.]{Occupancy grid algorithm for multiple sensors proposed by \citeauthor{elfes1989using}.}
     \label{fig:occupancy_grid_algorithm}
 \end{figure}
 
@@ -164,7 +166,7 @@ Hector SLAM first emerged in 2013 to solve the very specific problem of mapping 
 
 Karto is a graph-based SLAM algorithm developed by Karto Robotics and made open-source in 2010. Graph-based SLAM, proposed initially by \citeauthor{lu1997globally}, works by organizing the robot pose information into a graph and then optimizing it to make it more consistent and minimize an error function. While the construction of the graph is heavily sensor dependent, optimizing the graph is computationally expensive and the reason why Graph-based SLAM took so long to become popular \cite{grisetti2010tutorial}.
 
-The graph is constructed representing every pose for the robot as a node in the graph. Every robot movement is then represented as an edge in the graph that connects the poses, this data in the edge usually being the odometry information. If the robot comes back to a known position, the algorithm does the loop closure and connects the graph to a previously known node. Since odometry is not reliable, it is corrected using the laser scanner measurements. The scan observation in both poses is then matched to calculate the virtual transformation that should map one measurement optimally to the other. Let $z_{i,j}$ be the odometry information between poses $i$ and $j$ and $\hat{z_{i,j}}$ be the expected measurement, the error $e_{i,j}$ can be calculated simply subtracting one from the other.
+The graph is constructed representing every pose for the robot as a node in the graph. Every robot movement is then represented as an edge in the graph that connects the poses, this data in the edge usually being the odometry information. If the robot comes back to a known position, the algorithm does the loop closure and connects the graph to a previously known node. Since odometry is not reliable, it is corrected using the laser scanner measurements. The scan observation in both poses is then matched to calculate the virtual transformation that should map one measurement optimally to the other. Let $z_{i,j}$ be the odometry information between poses $i$ and $j$ and $\hat{z_{i,j}}$ be the expected measurement, the error $e_{i,j}$ can be calculated simply subtracting one from the other, i.e,
 
 \begin{equation}
     e_{i,j}(x_i, x_j) = z_{i,j} - \hat{z_{i,j}}
@@ -176,13 +178,13 @@ The goal is to ultimately build a function $F(x)$ using the log-likelihood strat
     F(x) = \sum_{\langle i, j \rangle \ \in \ \mathcal{C}} e_{i,j}^T \Omega_{i,j} e_{i,j}
 \end{equation}
 
-so that it can be minimized by the optimization algorithm for $x^*$. In order words, the questions is what is the optimal path that minimizes the observed error, given the distribution $\Omega$ and the measurements $z$ and $\hat{z}$.
+\noindent so that it can be minimized by the optimization algorithm for $x^*$, i.e, 
 
 \begin{equation}
-    x^* = \text{argmin}_x \ F(x)
+    x^* = \text{argmin}_x \ F(x) \,.
 \end{equation}
 
-The optimization is the main problem when dealing with graph-based SLAM, and many different approaches exist to solve this problem. Karto uses Sparse Pose Adjustment, which takes advantage of the sparsity on the large matrices required to solve the optimization problem \cite{konolige2010efficient}.
+In order words, the questions is what is the optimal path that minimizes the observed error, given the distribution $\Omega$ and the measurements $z$ and $\hat{z}$. The optimization is the main problem when dealing with graph-based SLAM, and many different approaches exist to solve this problem. Karto uses Sparse Pose Adjustment, which takes advantage of the sparsity on the large matrices required to solve the optimization problem \cite{konolige2010efficient}.
 
 \subsection{Cartographer}
 
@@ -192,14 +194,14 @@ The idea of having submaps is that it is only built using a few scans, meaning t
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=0.6\linewidth]{cartographer}
-    \caption{High-level System overview of Cartographer \cite{cartographerimage}.}
+    \includegraphics[width=\linewidth]{cartographer}
+    \caption[High-level System overview of Cartographer.]{High-level System overview of Cartographer \cite{cartographerimage}.}
     \label{fig:cartographer}
 \end{figure}
 
 \section{Evaluating SLAM performance} \label{sec:evaluating}
 
-There is a lot of debate on how to evaluate SLAM performance. Since there are plenty of algorithms using different techniques, each one of them having their own set of parameters, there is a need to evaluate them and tell which one does better in each scenario. A lot of this evaluation is done visually, assisted by a human that tells whether the occupancy grid is adequate considering the building floor plans. But as SLAM algorithms get more precise, it is difficult to draw conclusions just from the appearance itself. Plus, there is the problem of not having the floor plants for publicly available datasets, making it harder to compare between methods \cite{kummerle2009measuring}.
+There is a lot of debate on how to evaluate SLAM performance. Since there are plenty of algorithms using different techniques, each one of them having their own set of parameters, there is a need to evaluate them and tell which one does better in each scenario. A lot of this evaluation is done visually, assisted by a human that tells whether the occupancy grid is adequate considering the building floor plans. But as SLAM algorithms get more precise, it is difficult to draw conclusions just from the appearance itself. Additionally, there is the problem of not having the floor plants for publicly available datasets, making it harder to compare between methods \cite{kummerle2009measuring}.
 
 According to \citeauthor{amigoni2007good}, the following issues have to be addressed when comparing SLAM:
 
@@ -212,19 +214,19 @@ According to \citeauthor{amigoni2007good}, the following issues have to be addre
     \item Bad mapping results must be shown.
 \end{itemize}
 
-The most natural way of analyzing the poses is the squared error from the pose estimates against the ground truth. By calculating the distance from one to another and adding over time, we can get a good metric for the pose error. Considering the $x_i$ as the pose calculated by the SLAM and $x_i^*$ the ground truth pose and $N$ the total number of poses, we can derive the \prettyref{eq:error_squared} for the squared error.
+The most natural way of analyzing the poses is the squared error from the pose estimates against the ground truth. By calculating the distance from one to another and adding over time, we can get a good metric for the pose error. Considering the $x_i$ as the pose calculated by the SLAM and $x_i^*$ the ground truth pose and $N$ the total number of poses, we can derive the squared error $\epsilon(x)$ as follows:
 
 \begin{equation}\label{eq:error_squared}
-\epsilon(x) = \frac{1}{N} \sum_{i = 1}^N (x_i - x_i^*)^2
+\epsilon(x) = \frac{1}{N} \sum_{i = 1}^N (x_i - x_i^*)^2 \,.
 \end{equation}
 
-\citeauthor{kummerle2009measuring} proposes a framework to analyze mapping accuracy that uses visual inspection in order to estimate the relations between the robot poses and the environment. The estimation is then compared to the SLAM results and the final metric is the "deformation energy" required to transform the mapped result into ground truth. In other words, each of the $N_c$ displacements $\delta_{i,j}$ is compared against the ground truth $\delta_{i,j}^*$ using the \prettyref{eq:displacement}, for a set of  $(i,j)$ pairs.
+\citeauthor{kummerle2009measuring} proposes a framework to analyze mapping accuracy that uses visual inspection in order to estimate the relations between the robot poses and the environment. The estimation is then compared to the SLAM results and the final metric is the "deformation energy" required to transform the mapped result into ground truth. In other words, each of the $N_c$ displacements $\delta_{i,j}$ is compared against the ground truth $\delta_{i,j}^*$ using $\epsilon(\delta)$ given by
 
 \begin{equation}\label{eq:displacement}
     \epsilon(\delta) = \frac{1}{N_c} \sum_{i, j} trans(\delta_{i,j} \ominus \delta_{i,j}^*)^2 + rot(\delta_{i,j} \ominus \delta_{i,j}^*)^2
 \end{equation}
 
- The displacement $\delta_{i, j}$ is simply calculated by the transformation from a local measurement between two known poses, from pose $x_i$ to pose $x_j$, using a distance function like the Euclidian Distance. Evaluating the displacement instead of the global position is great because it makes the evaluation resilient to small errors at the start of mapping that would impact every subsequent global position, even when the mapping in the next steps is done correctly. Since the ground-truth displacement is not available, this implementation relies on the fact that the relation between two poses can be calculated using the laser scanner, each pose later evaluated by a human. It also relies on a good enough initial guess, also human assisted. The authors also assume just evaluating the poses without evaluating the resulting map is enough for SLAM benchmarking. While this holds true for most cases, it is still very hard to infer global performance, as global displacements (large enough distance between $i$ and $j$) also carry the problem of accumulating human error, as each measurement is supervised.
+ \noindent for a set of  $(i,j)$ pairs. The displacement $\delta_{i, j}$ is simply calculated by the transformation from a local measurement between two known poses, from pose $x_i$ to pose $x_j$, using a distance function like the Euclidian Distance. Evaluating the displacement instead of the global position is great because it makes the evaluation resilient to small errors at the start of mapping that would impact every subsequent global position, even when the mapping in the next steps is done correctly. Since the ground-truth displacement is not available, this implementation relies on the fact that the relation between two poses can be calculated using the laser scanner, each pose later evaluated by a human. It also relies on a good enough initial guess, also human assisted. The authors also assume just evaluating the poses without evaluating the resulting map is enough for SLAM benchmarking. While this holds true for most cases, it is still very hard to infer global performance, as global displacements (large enough distance between $i$ and $j$) also carry the problem of accumulating human error, as each measurement is supervised.
  
  \citeauthor{santos2013evaluation} propose a more in-depth comparison with the publicly available SLAM algorithms that run on ROS. The authors ran both noise-free simulation and real-life experiments with the scenarios and analyzed. The maps collected were binarized and aligned and error metric was defined as the normalized sum of distances from all pixels in the resulting map to its nearest neighbour in the ground-truth map. The error metrics were analyzed, also evaluating the CPU usage for each algorithm. The authors, however, didn't provide extensive information on how the maps were aligned, very crucial since the fit has to be optimal in order to do an adequate comparison.
  
@@ -267,7 +269,7 @@ The third map, shown on \figurename~\ref{subfig:test3}, will test how the locali
 
 \section{Pose metrics} \label{sec:metrics}
 
-\prettyref{sec:proposed-evaluation} proposed the metrics that will be used to evaluate the algorithms. \prettyref{fig:metrics} illustrates some of the measurements that are taken between two estimated poses $x_i$ and $x_j$, in green, and two ground-truth poses, $x_i^*$ and $x_j^*$, in red.
+\prettyref{sec:proposed-evaluation} presented the metrics that will be used to evaluate the algorithms. \prettyref{fig:metrics} illustrates some of the measurements that are taken between two estimated poses $x_i$ and $x_j$, in green, and two ground-truth poses, $x_i^*$ and $x_j^*$, in red.
 
 \begin{figure}[!ht]
     \centering
@@ -286,20 +288,20 @@ The displacements $\delta_{i,j}$ and $\delta_{i,j}^*$ are calculated by taking t
 x^c_j - x^c_i \\
 y^c_j - y^c_i \\
 \theta_j - \theta_i
-\end{bmatrix}
+\end{bmatrix} \,.
 \end{equation}
 
-The goal is to calculate the contributions $trans(\delta_{i,j} \ominus \delta_{i,j}^*)$ and $rot(\delta_{i,j} \ominus \delta_{i,j}^*)$, respectively the linear displacement and the angular displacement. As mentioned, these transformations can be calculated using the Euclidian distance.
+The goal is to calculate the contributions $trans(\delta_{i,j} \ominus \delta_{i,j}^*)$ and $rot(\delta_{i,j} \ominus \delta_{i,j}^*)$, respectively the linear displacement and the angular displacement. As mentioned, these transformations can be calculated using the Euclidian distance as following:
 
 \begin{equation}
 trans(\delta_{i,j} \ominus \delta_{i,j}^*)^2 =
 ((x^c_j - x^c_i) - (x^{c*}_j - x^{c*}_i))^2 + 
-((y^c_j - y^c_i) - (y^{c*}_j - y^{c*}_i))^2
+((y^c_j - y^c_i) - (y^{c*}_j - y^{c*}_i))^2 \,,
 \end{equation}
 
 \begin{equation}
 rot(\delta_{i,j} \ominus \delta_{i,j}^*)^2 = 
-((\theta_j - \theta_i) - (\theta_j^* - \theta_i^*))^2
+((\theta_j - \theta_i) - (\theta_j^* - \theta_i^*))^2 \,.
 \end{equation}
 
 \citeauthor{kummerle2009measuring} proposes to select the pairs $(i,j)$ from the dataset using scan matching evaluated by a human operator. Since our dataset have the ground-truth, all possible displacements can be evaluated. Given a set o $N$ poses, the linear displacement can then be represented by:
@@ -308,7 +310,7 @@ rot(\delta_{i,j} \ominus \delta_{i,j}^*)^2 =
 \text{Linear displacement} = \frac{1}{N^2} \sum_{i = 1}^N \sum_{j = 1}^N trans(\delta_{i,j} \ominus \delta_{i,j}^*)^2
 \end{equation}
 
-and the angular displacement by:
+\noindent and the angular displacement by:
 
 \begin{equation}
 \text{Angular displacement} = \frac{1}{N^2} \sum_{i = 1}^N \sum_{j = 1}^N rot(\delta_{i,j} \ominus \delta_{i,j}^*)^2
@@ -321,17 +323,17 @@ trans(d_i)^2 = (x^{c*}_i - x^{c*}_i)^2 + (y^{c*}_j - y^{c*}_j)^2
 \end{equation}
 
 \begin{equation}
-rot(d_i)^2 = (\theta_i - \theta^*_i)^2
+rot(d_i)^2 = (\theta_i - \theta^*_i)^2 \,.
 \end{equation}
 
-The individual pose errors are then summed across the trajectory and normalized.
+The individual pose errors are then summed across the trajectory and normalized according to the following equations:
 
 \begin{equation}
-\text{Linear squared error} = \sum_{i=1}^N \frac{1}{N} trans(d_i)^2
+\text{Linear squared error} = \sum_{i=1}^N \frac{1}{N} trans(d_i)^2 \,,
 \end{equation}
 
 \begin{equation}
-\text{Angular squared error} = \sum_{i=1}^N \frac{1}{N} rot(d_i)^2
+\text{Angular squared error} = \sum_{i=1}^N \frac{1}{N} rot(d_i)^2 \,.
 \end{equation}
 
 \section{Map alignment metric} \label{sec:icp}
@@ -340,10 +342,10 @@ Once the map is saved, we have both the reference map and the generated map, as 
 
 \begin{figure}[!ht]
      \centering
-     \subfloat[][]{\includegraphics[width=.3\linewidth]{test1_cropped}\label{subfig:test1_cropped}}
+     \subfloat[][Ground truth]{\includegraphics[width=.3\linewidth]{test1_cropped}\label{subfig:test1_cropped}}
      \hspace{2cm}
-     \subfloat[][]{\includegraphics[width=.3\linewidth]{gmapping_test1}\label{subfig:test1_gmapping}}
-     \caption{Ground truth (a) and SLAM generated map (b).}
+     \subfloat[][SLAM generated map]{\includegraphics[width=.3\linewidth]{gmapping_test1}\label{subfig:test1_gmapping}}
+     \caption{Occupancy grid representation of ground truth and SLAM generated map.}
      \label{fig:reference_map_icp}
 \end{figure}
 
@@ -351,10 +353,10 @@ First, both maps are imported as a point cloud, each pixel representing a point 
 
 \begin{figure}[!ht]
      \centering
-     \subfloat[][]{\includegraphics[width=.45\linewidth]{original_pcl}\label{subfig:original_pcl}}
+     \subfloat[][Ground truth]{\includegraphics[width=.45\linewidth]{original_pcl}\label{subfig:original_pcl}}
      \hspace{0cm}
-     \subfloat[][]{\includegraphics[width=.45\linewidth]{map_pcl}\label{subfig:map_pcl}}
-     \caption{Ground truth (a) and SLAM generated map (b) represented in point clouds.}
+     \subfloat[][SLAM generated map]{\includegraphics[width=.45\linewidth]{map_pcl}\label{subfig:map_pcl}}
+     \caption{Point cloud representation of ground truth and SLAM generated map.}
      \label{fig:point_cloud}
 \end{figure}
 
@@ -369,20 +371,20 @@ The ICP algorithm used is the one provided by \citeauthor{flannigan2019}. It wil
     \label{fig:alignment_pcl}
 \end{figure}
 
-With the maps aligned, we then use the following equation to calculate the error metric, where P is the number of points in \figurename~\ref{subfig:map_pcl}, $p_i$ represents one point in the data set and $p_i^*$ is the nearest neighbour of $p_i$ in the dataset shown on \figurename~\ref{subfig:original_pcl}. All the measurements are in pixels.
+With the maps aligned, we then use the following equation
 
 \begin{equation}
 \epsilon(\text{map}) = \frac{1}{P} \sum_{i=1}^P dist(p_i - p_i^*(p_i))^2
 \end{equation}
 
-
+\noindent to calculate the error metric, where P is the number of points in \figurename~\ref{subfig:map_pcl}, $p_i$ represents one point in the data set and $p_i^*$ is the nearest neighbour of $p_i$ in the dataset shown on \figurename~\ref{subfig:original_pcl}. All the measurements are in pixels.
 
 \section{Free space metric} \label{sec:free_space}
 
 As important as placing the walls in the correct spots, metric that will be checked using ICP, is modeling free space correctly, where the robot can move. This is done by each algorithm by setting the pixels that are free as white. Those white pixels can be counted and checked against the free space in the original map. Since we only want a measurement of scale, we can use the following formula, where $w_o$ is the number of white pixels in the original image and $w_m$ is the number of pixels in the map generated by SLAM:
 
 \begin{equation}
-\epsilon(\text{space}) = \frac{w_o - w_m}{w_o} \times 100
+\epsilon(\text{space}) = \frac{w_o - w_m}{w_o} \times 100 \,.
 \end{equation}
 
 The signal of the result will also give indications about the mapping. If it is positive, it means that the original map has more white pixels than the mapped result, meaning the SLAM was more conservative and mapped less space than available. If it's negative, the algorithm actually mapped space that is not there, meaning the navigation layer will, later on, have to deal with this problem.

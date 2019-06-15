@@ -2,9 +2,9 @@
 %\vspace{-1.5cm}
 %\noindent\rule{\columnwidth}{1.2mm}
 
-\section{ROS}
+\section{Robot operating system}
 
-There are many problems when developing robot applications, especially because of the complexity of those systems. As more and more functionality is added to the robot, the code base becomes fluttered with intricate dependencies and entangled libraries. ROS is not an operating system per se, but a framework that allows coders to readily develop and test solutions with modularity and code reusability in mind. It was built in an agnostic package system that allows integration with many packages available from the ROS Open-source community, a lot of them implementing support libraries and proof-of-concept algorithms, as well as core infrastructure.
+There are many problems when developing robot applications, especially because of the complexity of those systems. As more and more functionality is added to the robot, the code base becomes fluttered with intricate dependencies and entangled libraries. ROS (Robot Operating System) is not an operating system per se, but a framework that allows coders to readily develop and test solutions with modularity and code reusability in mind. It was built in an agnostic package system that allows integration with many packages available from the ROS Open-source community, a lot of them implementing support libraries and proof-of-concept algorithms, as well as core infrastructure.
 
 The main aspects of ROS are \cite{quigley2009ros}:
 
@@ -13,16 +13,16 @@ The main aspects of ROS are \cite{quigley2009ros}:
 \item Tools-based: instead of building an intricate framework, ROS relies on a set of tools written to perform specific tasks, including various tools for compilation, tap data stream, data plotting, configuration, documentation generation, etc. Custom tools can even be written by the user in the form of new packages.
 \item Multi-lingual: since communication between nodes relies only on XML-RPC, they can be implemented in any language, either by explicitly writing the full library that interacts with the ROS Core or building a wrapper for the ROS C++ library.
 \item Thin: many robots implementations have parts of the code that could be reused in another project if they weren't so entangled with all existing code. ROS proposes an architecture where the code is separated into packages that hold no dependency on ROS. All packages can be built individually using CMake, different from the traditional software paradigm where one CMake file builds the entire project.
-\item Free and Open-source: ROS source code is publicly available and released under the BSD License, allowing copy and redistribution of the source code, including for commercial purposes.
+\item Free and Open-source: ROS source code is publicly available and released under the BSD License, allowing you to copy, modify and redistribute the source code, including for commercial purposes.
 \end{itemize}
 
-The execution of ROS is separated into smaller pieces of code that do particular tasks, called nodes. Each time ROS Core is launched, a collection nodes that are required for execution are spawned: the ROS master, that provides support for the registration of all subsequent nodes, the ROS parameter server, to register parameters during execution time, and rosout, for logging purposes. Once the core is launched, every other node can be spawned.
+The execution of ROS is separated into smaller pieces of code that do particular tasks, called nodes. Each time ROS Core is launched, a collection nodes that are required for execution are spawned: the ROS master, that provides support for the registration of all subsequent nodes, the ROS parameter server, to register parameters during execution time, and the \texttt{rosout} node, for logging purposes. Once the core is launched, every other node can be spawned.
 
 \subsection{Packages}
 
 In order to better build robotic systems, ROS adopts a packaged architecture, making every subsystem of the application separate from all the others. Every package can contain new nodes, libraries, configuration or even datasets.
 
-The main advantage of this approach is making the code more organized in its own subsystems and sub-subsystems, that specialize in doing a specific task very well so that other packages can use this functionality. Packages can also be written independently of language, as long as it's supported by ROS.
+The main advantage of this approach is making the code more organized in its own subsystems, that specialize in doing a specific task well so that other packages can use this functionality. Packages can also be written independently of language, as long as it's supported by ROS.
 
 \subsection{Topics}
 
@@ -31,8 +31,8 @@ In order for nodes to communicate, they interact by publishing messages in topic
 % TODO: refazer imagem para evitar citação
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.5\linewidth]{rostopic}
-\caption{Topic initialization \cite{rosoverview}.}
+\includegraphics[width=0.66\linewidth]{rostopic}
+\caption[Topic initialization.]{Topic initialization \cite{rosoverview}.}
 \label{fig:rostopic}
 %\small{Source: ROSWiki.}
 \end{figure}
@@ -47,7 +47,7 @@ The topics are implemented in the XML-RPC protocol, using a master node in order
 \item Subscriber connects using the selected protocol.
 \end{enumerate}
 
-The process described above is illustrated in \prettyref{fig:rostopic}. It's important to notice that, once the connection is established, the communication is maintained peer-to-peer, using former protocols like TCPROS, built over TCP/IP, and UDPROS, built over UDP. This not only provides faster communication inside the same network by not requiring the messages to be relayed through the master but also enables communication through available networks of the Internet protocol suite, including 802.11X wireless transmission.
+The process described above is illustrated in \prettyref{fig:rostopic}. It's important to notice that, once the connection is established, the communication is maintained peer-to-peer, using former protocols like TCPROS, built over TCP, and UDPROS, built over UDP. This not only provides faster communication inside the same network by not requiring the messages to be relayed through the master but also enables communication through available networks of the Internet protocol suite, including 802.11X wireless transmission.
 
 The topic configuration also enables true agnostic packages, since the communication between them will be done using a standardized communication medium, loosely coupling the packages and making them easily maintainable. Debugging can also be done using command-line tools that wiretap this medium and display the information exchanged by nodes.
 
@@ -155,7 +155,7 @@ The Gazebo simulator offers:
 \item Robot models, including ones from the community.
 \end{itemize}
 
-All the robot description is made using a URDF file or an SDF file. The URDF or Universal Robotic Description Format file is an XML file describing all elements of the robot. Even though it's called ``Universal'', it lacks some of the features like parallel linkages, friction, etc. To get around these issues, a new model called SDF or  Simulation Description Format was developed specifically for use in Gazebo, while the URDF was maintained for backward compatibility. Every time a URDF file is loaded, it is converted by Gazebo to an SDF equivalent.
+All the robot description is made using a URDF (Universal Robotic Description Format) file or an SDF (Simulation Description Format) file. The URDF  file is an XML file describing all elements of the robot. Even though it's called ``Universal'', it lacks some of the features like parallel linkages, friction, etc. To get around these issues, a new model called SDF was developed specifically for use in Gazebo, while the URDF was maintained for backward compatibility. Every time a URDF file is loaded, it is converted by Gazebo to an SDF equivalent.
 
 \subsection{URDF}
 
@@ -199,7 +199,7 @@ All four engines are used to tackle different problems. By varying the time step
 
 Gazebo also allows simulating sensors and actuators that will interact with the world and send data back to ROS packages. Sensors can include cameras, laser scanners, contact sensors, IMU, RFID, Sonar, Magnetometer. Actuators can use the ROS control library to actuate joints. The sensors are described in the SDF or URDF files. The example below shows an example of a camera description.
 
-\begin{lstlisting}[caption=Camera Description., language=XML]
+\begin{lstlisting}[caption=Exemple of a URDF file for a camera description., language=XML]
   <gazebo reference="camera_link">
     <sensor type="camera" name="camera1">
       <update_rate>30.0</update_rate>
@@ -248,7 +248,7 @@ There are many pre-built plugins available at Gazebo library, including Cameras 
 
 %There are also plugins for RVIZ visualization of the planned trajectories. They help by providing visual tools to work with the robot, examining poses and testing trajectories behavior. There are also many plugins available for Inverse Kinematics calculation, as well as wrappers to write your own solver.
 
-\section{COB}
+\section{Care-o-bot}
 
 Care-o-bot is a project for a mobile assistive robot that is modular, developed and maintained by Fraunhofer IPA. COB's fourth version, \prettyref{fig:cob4}, was designed not only to provide researchers a reliable mobile base, but also to aid research on human-robot interaction and social behavior \cite{mci/Kittmann2015}. It is composed mainly by a mobile base, a torso, and a head.
 
@@ -256,7 +256,7 @@ Care-o-bot is a project for a mobile assistive robot that is modular, developed 
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=.8\linewidth]{cob4}
-\caption{COB 4 full robot with both manipulators \cite{care-o-bot-image-full}}
+\caption[COB 4 full robot with both manipulators.]{COB 4 full robot with both manipulators \cite{care-o-bot-image-full}.}
 \label{fig:cob4}
 \end{figure}
 

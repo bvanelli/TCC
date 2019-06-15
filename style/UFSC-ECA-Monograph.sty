@@ -32,6 +32,8 @@
 % referências
 \usepackage{prettyref} % facilita a construção de referências, deve-se usar \prettyref{...} no lugar de \ref{...}
 
+\usepackage{pdfpages}
+
 \ifx\isenglish\undefined
 \newrefformat{fig}{Figura~\ref{#1}}
 \newrefformat{tab}{Tabela~\ref{#1}}
@@ -253,58 +255,7 @@ for the degree of BEng. in Automation and Control Engineering of the Universidad
 %
 \newcommand{\folhaaprovacao}{
 \newpage
-\begin{center}
-{\large \textbf{\imprimirautor}}
-\end{center}
-
-\vspace*{0.75cm}
-
-\begin{center}
-    \ifx\isenglish\undefined
-        \LARGE\ABNTEXchapterfont\imprimirtitulo\par
-    \else
-        \LARGE\ABNTEXchapterfont\deeltitulouk\par
-    \fi
-\end{center}
-
-\vspace*{1cm}
-
-
-\begin{flushright}
-\begin{minipage}{11cm}
-    \ifx\isenglish\undefined
-            {Trabalho de Conclusão de Curso apresentado à Universidade Federal de Santa Catarina como requisito parcial para a obtenção do título de Engenheiro de Controle e Automação.}
-        \else
-            {Final paper submitted in partial fulfillment of the requirements
-for the degree of BEng. in Automation and Control Engineering of the Universidade Federal de Santa Catarina.}
-        \fi
-\end{minipage}
-\end{flushright}
-\vspace*{0.4cm}
-
-\begin{flushright}
- \ifx\isenglish\undefined
-            \textbf{Comissão Examinadora}
-        \else
-            \textbf{Examination Committee}
-        \fi
-
-\end{flushright}
-\vspace*{-0.5cm}
-
-\setlength{\ABNTEXsignthickness}{0.4pt}
-\setlength{\ABNTEXsignskip}{1.5cm}
-
-\begin{flushright}
-\assinatura*{Prof. Dr. Carlos Roberto Moratelli \\ Universidade Federal de Santa Catarina}
-\hspace*{0.75cm}
-\assinatura*{\deeljuryb \\ Universidade Federal de Santa Catarina}
-\hspace*{0.75cm}
-\assinatura*{\deeljuryc \\ Universidade Federal de Santa Catarina}
-\end{flushright}
-
-\vspace*{2.5cm}
-\centerline{Blumenau, June 11, 2019}
+\includepdf[pages=-]{signatures.pdf}
 }
 
 %-----------Formatação da Dedicatória ----------
